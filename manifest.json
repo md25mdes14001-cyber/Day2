@@ -1,0 +1,21 @@
+{
+  "short_name": "MYDAY2",
+  "name": "MYDAY2 - Intelligent Life OS & AI Second Brain",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3233/3233959.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3233/3233959.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/index.html",
+  "background_color": "#fbf9f3",
+  "theme_color": "#8DA399",
+  "display": "standalone",
+  "orientation": "portrait"
+}

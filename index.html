@@ -1,0 +1,2493 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+    <title>MYDAY2 - Intelligent Life OS & AI Second Brain</title>
+    
+    <!-- PWA Manifest & App configuration -->
+    <link rel="manifest" href="/manifest.json"/>
+    <meta name="theme-color" content="#8DA399"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    
+    <!-- Tailwind CSS (with plugins) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Premium Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Supabase client JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Custom Design Token Classes and Dynamic Motion Config -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        surface: "#fbf9f3",
+                        "surface-dim": "#dbdad4",
+                        "surface-bright": "#fbf9f3",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f5f4ed",
+                        "surface-container": "#efeee7",
+                        "surface-container-high": "#eae8e2",
+                        "surface-container-highest": "#e4e2dc",
+                        "on-surface": "#1b1c18",
+                        "on-surface-variant": "#444748",
+                        outline: "#747878",
+                        "outline-variant": "#c4c7c7",
+                        primary: "#1A1A1A",
+                        "on-primary": "#ffffff",
+                        secondary: "#5d5f5b",
+                        "secondary-container": "#e0e0db",
+                        "on-secondary-container": "#62635f",
+                        
+                        // Accents
+                        sage: "#8DA399",
+                        "sage-container": "#d1e8dd",
+                        "on-sage-container": "#374b43",
+                        blue: "#A4B8C4",
+                        "blue-container": "#d9e2ec",
+                        "on-blue-container": "#243b53",
+                        error: "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        full: "9999px"
+                    },
+                    fontFamily: {
+                        sans: ["Hanken Grotesk", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Hanken Grotesk', sans-serif;
+            background-color: #fbf9f3;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100dvh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .dark body {
+            background-color: #121310;
+            color: #eae8e2;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(251, 249, 243, 0.85);
+            border-bottom: 1px solid rgba(27, 28, 24, 0.05);
+        }
+        
+        .dark .glass-nav {
+            background: rgba(18, 19, 16, 0.85);
+            border-bottom: 1px solid rgba(234, 232, 226, 0.05);
+        }
+
+        /* Hide Scrollbar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Smooth Scale Action */
+        .active-scale:active {
+            transform: scale(0.97);
+            transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* Keyboard Focus states */
+        input:focus-visible, textarea:focus-visible, button:focus-visible {
+            outline: 2px solid #8DA399;
+            outline-offset: 2px;
+        }
+
+        /* Reduced Motion Mode styling */
+        .reduced-motion * {
+            animation-duration: 0s !important;
+            animation-delay: 0s !important;
+            transition-duration: 0s !important;
+            transition-delay: 0s !important;
+        }
+
+        /* Swipe gestured task row */
+        .swipe-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.75rem;
+        }
+
+        .swipe-actions-left, .swipe-actions-right {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            color: white;
+            z-index: 1;
+        }
+        
+        .swipe-actions-left { left: 0; background-color: #8DA399; }
+        .swipe-actions-right { right: 0; background-color: #ba1a1a; }
+
+        .swipe-item-inner {
+            position: relative;
+            z-index: 10;
+            transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+            touch-action: pan-y;
+        }
+
+        /* Focus Animation Pulse */
+        @keyframes radial-pulse {
+            0% { box-shadow: 0 0 0 0px rgba(164, 184, 196, 0.4); }
+            100% { box-shadow: 0 0 0 12px rgba(164, 184, 196, 0); }
+        }
+        .focus-pulse {
+            animation: radial-pulse 2s infinite cubic-bezier(0.25, 0, 0, 1);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface select-none pb-24 md:pb-28">
+
+    <!-- AUTHENTICATION OVERLAY MODAL -->
+    <div id="authOverlay" class="fixed inset-0 z-[120] bg-surface dark:bg-surface-dim flex flex-col justify-center items-center p-6 transition-all duration-500 overflow-y-auto">
+        <div class="max-w-md w-full bg-white dark:bg-surface-container p-8 rounded-3xl shadow-2xl border border-outline-variant/10 space-y-6">
+            <div class="text-center space-y-2">
+                <h2 class="text-3xl font-bold tracking-tight text-primary dark:text-white uppercase">MYDAY2</h2>
+                <p class="text-xs text-on-surface-variant opacity-80">Connected Cloud Second Brain & Execution Engine</p>
+            </div>
+
+            <!-- Tabs to toggle Sign In vs Sign Up -->
+            <div class="flex bg-surface-container-low p-1 rounded-xl">
+                <button id="authTabLoginBtn" class="flex-1 py-2 text-xs font-bold rounded-lg bg-white dark:bg-primary shadow-sm">Sign In</button>
+                <button id="authTabSignupBtn" class="flex-1 py-2 text-xs font-bold text-on-surface-variant rounded-lg">Sign Up</button>
+            </div>
+
+            <!-- Login form -->
+            <form id="authForm" class="space-y-4" onsubmit="handleAuthSubmit(event)">
+                <div class="space-y-1">
+                    <label for="authEmail" class="text-[10px] font-bold uppercase tracking-wider text-secondary">Email Address</label>
+                    <input type="email" id="authEmail" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs focus:ring-0 focus:border-sage" placeholder="you@domain.com"/>
+                </div>
+                <div class="space-y-1">
+                    <label for="authPassword" class="text-[10px] font-bold uppercase tracking-wider text-secondary">Password</label>
+                    <input type="password" id="authPassword" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs focus:ring-0 focus:border-sage" placeholder="Minimum 6 characters"/>
+                </div>
+                <div class="space-y-1 hidden" id="signupNameField">
+                    <label for="authName" class="text-[10px] font-bold uppercase tracking-wider text-secondary">Your Name</label>
+                    <input type="text" id="authName" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs focus:ring-0 focus:border-sage" placeholder="Alex / Julian" value="Alex"/>
+                </div>
+                
+                <button type="submit" class="w-full bg-primary text-white dark:bg-white dark:text-primary py-3.5 rounded-xl font-bold text-xs active-scale transition-transform">
+                    <span id="authSubmitText">Access Account</span>
+                </button>
+            </form>
+
+            <div class="relative flex py-2 items-center">
+                <div class="flex-grow border-t border-outline-variant/20"></div>
+                <span class="flex-shrink mx-4 text-[10px] uppercase font-bold text-secondary">Or Continue Without Sync</span>
+                <div class="flex-grow border-t border-outline-variant/20"></div>
+            </div>
+
+            <button onclick="bypassAuthOffline()" class="w-full border border-dashed border-outline/30 text-on-surface py-3 rounded-xl font-bold text-xs active-scale hover:bg-surface-container-low transition-colors">
+                Run Local-Only (Offline Mode)
+            </button>
+        </div>
+    </div>
+
+
+    <!-- ONBOARDING MODAL OVERLAY -->
+    <div id="onboardingOverlay" class="fixed inset-0 z-[100] bg-surface dark:bg-surface-dim flex flex-col justify-between p-6 transition-all duration-500 overflow-y-auto hidden">
+        <header class="flex items-center justify-between py-2">
+            <span class="text-lg tracking-tight font-bold text-primary dark:text-white uppercase">MYDAY2</span>
+            <div class="flex items-center gap-2">
+                <span id="onboardingProgressText" class="text-[10px] font-bold uppercase tracking-wider opacity-60">Step 1 of 6</span>
+                <div class="w-24 h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+                    <div id="onboardingProgressBar" class="h-full bg-sage w-1/6 transition-all duration-300"></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-md mx-auto w-full flex-grow flex flex-col justify-center py-8">
+            <!-- Step 1: Greeting & Name -->
+            <div id="obStep1" class="onboarding-step space-y-6">
+                <div class="space-y-2">
+                    <h2 class="text-3xl font-semibold tracking-tight">Setup Second Brain.</h2>
+                    <p class="text-on-surface-variant opacity-80 text-sm">Let's orchestrate a calm, high-performance daily planner. Confirm your name:</p>
+                </div>
+                <input type="text" id="obNameInput" class="w-full bg-surface-container-low border-b-2 border-outline/30 focus:border-sage text-2xl py-3 px-1 transition-all rounded-lg focus:ring-0 placeholder:opacity-40" value="Alex"/>
+            </div>
+
+            <!-- Step 2: Sleep Schedule -->
+            <div id="obStep2" class="onboarding-step space-y-6 hidden">
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-semibold tracking-tight">Rest & Rhythm</h2>
+                    <p class="text-on-surface-variant opacity-80 text-sm">Average hours of sleep per night:</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" class="ob-sleep-btn p-4 rounded-2xl bg-surface-container-low text-left border border-transparent hover:border-sage/40 active-scale" data-hours="6">
+                        <span class="block text-2xl font-bold">6 hours</span>
+                        <span class="text-xs opacity-60">Light rest</span>
+                    </button>
+                    <button type="button" class="ob-sleep-btn p-4 rounded-2xl bg-surface-container-low text-left border border-sage hover:border-sage active-scale" data-hours="8">
+                        <span class="block text-2xl font-bold">8 hours</span>
+                        <span class="text-xs opacity-60">Recommended</span>
+                    </button>
+                </div>
+                <div class="space-y-2 pt-4">
+                    <p class="text-xs font-bold text-on-surface-variant">Default wake time:</p>
+                    <input type="time" id="obWakeTime" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3" value="07:00"/>
+                </div>
+            </div>
+
+            <!-- Step 3: Peak Focus Hours -->
+            <div id="obStep3" class="onboarding-step space-y-6 hidden">
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-semibold tracking-tight">Focus Peak</h2>
+                    <p class="text-on-surface-variant opacity-80 text-sm">When is your mind sharpest? We will align deep sessions here.</p>
+                </div>
+                <div class="space-y-3">
+                    <button type="button" class="ob-focus-btn w-full p-4 rounded-2xl bg-surface-container-low text-left border border-sage flex justify-between items-center active-scale" data-window="09:00-12:00">
+                        <div>
+                            <span class="block font-semibold">Morning Focus Block</span>
+                            <span class="text-xs opacity-60">09:00 AM — 12:00 PM</span>
+                        </div>
+                        <span class="material-symbols-outlined text-sage">done</span>
+                    </button>
+                    <button type="button" class="ob-focus-btn w-full p-4 rounded-2xl bg-surface-container-low text-left border border-transparent flex justify-between items-center active-scale" data-window="14:00-17:00">
+                        <div>
+                            <span class="block font-semibold">Afternoon Flow</span>
+                            <span class="text-xs opacity-60">02:00 PM — 05:00 PM</span>
+                        </div>
+                        <span class="material-symbols-outlined opacity-0">done</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Work Style Mode -->
+            <div id="obStep4" class="onboarding-step space-y-6 hidden">
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-semibold tracking-tight">Scheduling Intensity</h2>
+                    <p class="text-on-surface-variant opacity-80 text-sm">Choose the planner mode for task suggestions.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" class="ob-style-btn p-4 rounded-2xl bg-surface-container-low text-left border border-transparent flex flex-col justify-between h-32 active-scale" data-mode="Deep Work">
+                        <span class="material-symbols-outlined text-blue">hourglass_empty</span>
+                        <span class="font-semibold text-sm">Deep Work</span>
+                    </button>
+                    <button type="button" class="ob-style-btn p-4 rounded-2xl bg-surface-container-low text-left border border-sage flex flex-col justify-between h-32 active-scale" data-mode="Balanced">
+                        <span class="material-symbols-outlined text-sage">balance</span>
+                        <span class="font-semibold text-sm">Balanced</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 5: Starter Goals -->
+            <div id="obStep5" class="onboarding-step space-y-6 hidden">
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-semibold tracking-tight">Main Goals</h2>
+                    <p class="text-on-surface-variant opacity-80 text-sm">Select goals to bootstrap your timeline:</p>
+                </div>
+                <div class="space-y-2">
+                    <div class="ob-goal-chip flex items-center justify-between p-4 rounded-xl bg-surface-container-low border border-sage cursor-pointer select-none" data-goal="Build consistent physical fitness">
+                        <span class="text-xs font-bold">Build Physical Fitness</span>
+                        <span class="material-symbols-outlined text-sage">check_circle</span>
+                    </div>
+                    <div class="ob-goal-chip flex items-center justify-between p-4 rounded-xl bg-surface-container-low border border-transparent cursor-pointer select-none" data-goal="Develop technical coding skills">
+                        <span class="text-xs font-bold">Master Coding Strategy</span>
+                        <span class="material-symbols-outlined opacity-0 text-sage">check_circle</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Initial Habits -->
+            <div id="obStep6" class="onboarding-step space-y-6 hidden">
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-semibold tracking-tight">Daily Habits</h2>
+                    <p class="text-on-surface-variant opacity-80 text-sm">Choose habits to track consistency:</p>
+                </div>
+                <div class="space-y-2">
+                    <div class="ob-habit-row flex items-center gap-3 p-4 rounded-xl bg-surface-container-low border border-sage cursor-pointer" data-habit="Drink 3L of water" data-icon="water_drop">
+                        <span class="material-symbols-outlined text-blue">water_drop</span>
+                        <span class="flex-grow text-xs font-bold">Daily Water Intake</span>
+                        <span class="material-symbols-outlined text-sage">done</span>
+                    </div>
+                    <div class="ob-habit-row flex items-center gap-3 p-4 rounded-xl bg-surface-container-low border border-sage cursor-pointer" data-habit="Morning Meditation" data-icon="self_improvement">
+                        <span class="material-symbols-outlined text-sage">self_improvement</span>
+                        <span class="flex-grow text-xs font-bold">Morning Meditation (10m)</span>
+                        <span class="material-symbols-outlined text-sage">done</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="flex items-center justify-between py-4 max-w-md mx-auto w-full">
+            <button id="obBackBtn" class="text-xs font-bold text-on-surface-variant opacity-60 px-4 py-2 hover:opacity-100 disabled:opacity-20 active-scale" disabled>Back</button>
+            <button id="obNextBtn" class="bg-primary text-on-primary dark:bg-white dark:text-primary px-8 py-3.5 rounded-xl font-bold flex items-center gap-2 active-scale">
+                <span>Continue</span>
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </button>
+        </footer>
+    </div>
+
+
+    <!-- MAIN APPLICATION CONTAINER -->
+    <div id="mainApp" class="hidden min-h-screen flex flex-col">
+        <!-- TOP APP BAR -->
+        <header class="fixed top-0 left-0 w-full z-40 glass-nav h-16 flex justify-between items-center px-6">
+            <div class="flex items-center gap-4">
+                <button id="sidebarToggle" aria-label="Open sidebar drawer" class="material-symbols-outlined text-primary dark:text-white text-2xl hover:opacity-70 transition-opacity active-scale">menu</button>
+                <h1 class="font-display-lg text-lg font-bold tracking-tight text-primary dark:text-white uppercase">MYDAY2</h1>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Search input -->
+                <div class="relative hidden sm:block">
+                    <input type="text" id="globalSearchInput" placeholder="Search task logs..." class="bg-surface-container-low border border-outline-variant/30 text-xs px-3 py-1.5 rounded-full w-48 focus:w-64 transition-all focus:border-sage focus:ring-0"/>
+                    <span class="material-symbols-outlined text-sm absolute right-3 top-2.5 opacity-40">search</span>
+                </div>
+                
+                <button id="assistantTrigger" aria-label="Toggle AI assistant" class="material-symbols-outlined text-primary dark:text-white text-2xl hover:opacity-70 transition-opacity active-scale">smart_toy</button>
+                
+                <div class="relative">
+                    <button id="notificationTrigger" aria-label="Notifications" class="material-symbols-outlined text-primary dark:text-white text-2xl hover:opacity-70 transition-opacity active-scale">notifications</button>
+                    <span id="notifBadge" class="absolute -top-1 -right-1 bg-error text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+                    
+                    <!-- Notification Panel -->
+                    <div id="notificationPanel" class="absolute right-0 mt-3 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl w-80 shadow-2xl p-4 hidden z-50">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-secondary">System Alerts</span>
+                            <button id="clearNotificationsBtn" class="text-xs text-error font-semibold hover:underline">Clear</button>
+                        </div>
+                        <div id="notificationList" class="space-y-2 max-h-60 overflow-y-auto">
+                            <p class="text-center text-xs opacity-50 py-4">No active reminders.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- SIDEBAR DRAWER (SETTINGS & DATA) -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] opacity-0 pointer-events-none transition-opacity duration-300"></div>
+        <div id="sidebar" class="fixed top-0 left-0 bottom-0 w-80 bg-surface-container-lowest dark:bg-surface-dim z-[100] transform -translate-x-full transition-transform duration-300 flex flex-col justify-between p-6 shadow-2xl">
+            <div class="space-y-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-sage-container flex items-center justify-center font-bold text-on-sage-container" id="profileInitial">A</div>
+                        <div>
+                            <h3 id="profileName" class="font-bold text-sm">Alex</h3>
+                            <span class="text-[10px] opacity-60" id="syncStatusLabel">Running Offline</span>
+                        </div>
+                    </div>
+                    <button id="sidebarClose" class="material-symbols-outlined opacity-60 hover:opacity-100">close</button>
+                </div>
+                
+                <nav class="space-y-1">
+                    <button data-tab="today" class="sidebar-nav-btn w-full text-left p-3 rounded-xl flex items-center gap-3 bg-surface-container-low text-primary font-semibold transition-colors active-scale">
+                        <span class="material-symbols-outlined text-xl">wb_sunny</span><span class="text-xs font-bold">Today Overview</span>
+                    </button>
+                    <button data-tab="tasks" class="sidebar-nav-btn w-full text-left p-3 rounded-xl flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-low transition-colors active-scale">
+                        <span class="material-symbols-outlined text-xl">check_circle</span><span class="text-xs font-bold">Tasks Database</span>
+                    </button>
+                    <button data-tab="calendar" class="sidebar-nav-btn w-full text-left p-3 rounded-xl flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-low transition-colors active-scale">
+                        <span class="material-symbols-outlined text-xl">calendar_today</span><span class="text-xs font-bold">Calendar Schedule</span>
+                    </button>
+                    <button data-tab="goals" class="sidebar-nav-btn w-full text-left p-3 rounded-xl flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-low transition-colors active-scale">
+                        <span class="material-symbols-outlined text-xl">emoji_events</span><span class="text-xs font-bold">Goals & Roadmap</span>
+                    </button>
+                    <button data-tab="insights" class="sidebar-nav-btn w-full text-left p-3 rounded-xl flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-low transition-colors active-scale">
+                        <span class="material-symbols-outlined text-xl">insights</span><span class="text-xs font-bold">System Insights</span>
+                    </button>
+                    <button data-tab="settings" class="sidebar-nav-btn w-full text-left p-3 rounded-xl flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-low transition-colors active-scale">
+                        <span class="material-symbols-outlined text-xl">settings</span><span class="text-xs font-bold">System Preferences</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="space-y-4">
+                <button id="authLogoutBtn" class="w-full text-center text-xs border border-outline-variant/30 py-2.5 rounded-xl font-bold hidden active-scale">Log Out Connection</button>
+                <button id="resetAppBtn" class="w-full text-center text-xs text-error font-semibold hover:underline border border-dashed border-error/30 py-2.5 rounded-xl">Clear All State</button>
+            </div>
+        </div>
+
+        <!-- MAIN ROUTE SCREENS (DYNAMICAL VIEW SWITCHING) -->
+        <main class="flex-grow mt-16 px-6 max-w-2xl mx-auto w-full pt-4 space-y-6">
+            
+            <!-- SCREEN 1: TODAY -->
+            <section id="screen-today" class="route-screen space-y-6">
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold tracking-tight text-on-surface" id="todayGreeting">Good morning, Alex</h2>
+                        <!-- AI planner button -->
+                        <button onclick="aiOptimizeSchedule()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sage-container text-on-sage-container text-xs font-bold hover:opacity-85 active-scale">
+                            <span class="material-symbols-outlined text-xs">auto_awesome</span>
+                            <span>Optimize Schedule</span>
+                        </button>
+                    </div>
+                    <div id="aiSummaryBanner" class="flex items-center gap-3 bg-surface-container-low/50 py-2 px-4 rounded-full border border-outline-variant/30 w-fit">
+                        <span class="material-symbols-outlined text-sm text-sage focus-pulse" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                        <p class="text-xs font-bold text-on-surface-variant" id="aiSummaryText">Initializing planner...</p>
+                    </div>
+                </div>
+
+                <!-- Top 3 Priorities -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Top Priorities</h3>
+                        <button class="text-xs font-bold text-sage hover:underline" onclick="switchTab('tasks')">Edit Board</button>
+                    </div>
+                    <div id="topPrioritiesContainer" class="space-y-2"></div>
+                </div>
+
+                <!-- Focus Session Widget -->
+                <div class="bg-primary text-on-primary dark:bg-surface-container dark:text-white rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <h3 class="font-bold text-base flex items-center gap-2">
+                            <span class="material-symbols-outlined text-blue">hourglass_empty</span>
+                            <span>Focus Session Block</span>
+                        </h3>
+                        <p class="text-xs opacity-75">Work intensely without distractions.</p>
+                        <div class="flex items-center gap-2 pt-1">
+                            <select id="focusDurationSelect" class="bg-transparent border-none text-xs font-semibold focus:ring-0 opacity-70 p-0 text-white cursor-pointer">
+                                <option class="text-primary" value="15">15 minutes</option>
+                                <option class="text-primary" value="25" selected>25 minutes</option>
+                                <option class="text-primary" value="45">45 minutes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-6 justify-between">
+                        <div id="focusTimerDisplay" class="text-3xl font-bold tabular-nums">25:00</div>
+                        <button id="focusStartBtn" class="bg-white text-primary dark:bg-white dark:text-primary px-6 py-2.5 rounded-full font-bold active-scale transition-transform">Start</button>
+                    </div>
+                </div>
+
+                <!-- Timeline Schedule -->
+                <div class="space-y-3">
+                    <h3 class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Today's Schedule</h3>
+                    <div class="space-y-0.5 relative pl-4 border-l border-outline-variant/30" id="todayTimeline"></div>
+                </div>
+
+                <!-- Habits checklist -->
+                <div class="space-y-3">
+                    <h3 class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Daily Habits</h3>
+                    <div class="bg-surface-container-low rounded-2xl p-4 space-y-3" id="todayHabitsList"></div>
+                </div>
+            </section>
+
+
+            <!-- SCREEN 2: TASKS -->
+            <section id="screen-tasks" class="route-screen space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold tracking-tight">Tasks Database</h2>
+                    <div class="flex items-center gap-2">
+                        <button id="bulkAddBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-low text-xs font-bold hover:bg-surface-container transition-colors active-scale">
+                            <span class="material-symbols-outlined text-[16px]">playlist_add</span>
+                            <span>Bulk Import</span>
+                        </button>
+                        
+                        <!-- List/Board Toggle -->
+                        <div class="bg-surface-container-low p-1 rounded-full flex gap-0.5">
+                            <button id="btnListView" class="px-3 py-1 rounded-full text-xs font-bold bg-white dark:bg-primary shadow-sm">List</button>
+                            <button id="btnBoardView" class="px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant">Board</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="flex gap-2 overflow-x-auto hide-scrollbar -mx-6 px-6 py-1">
+                    <button class="task-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary dark:bg-white dark:text-primary active-scale" data-category="All">All Tasks</button>
+                    <button class="task-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-surface-container-low text-on-surface-variant hover:bg-surface-container active-scale" data-category="Work">Work</button>
+                    <button class="task-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-surface-container-low text-on-surface-variant hover:bg-surface-container active-scale" data-category="Personal">Personal</button>
+                    <button class="task-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-surface-container-low text-on-surface-variant hover:bg-surface-container active-scale" data-category="Growth">Growth</button>
+                </div>
+
+                <!-- List View Container -->
+                <div id="tasksListContainer" class="space-y-3"></div>
+
+                <!-- Board (Kanban) View Container -->
+                <div id="tasksBoardContainer" class="grid grid-cols-3 gap-3 hidden">
+                    <div class="bg-surface-container-low p-3 rounded-2xl space-y-2">
+                        <div class="flex justify-between items-center px-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-secondary">To Do</span>
+                            <span id="countTodo" class="text-[10px] font-bold bg-surface-container px-2 py-0.5 rounded-full">0</span>
+                        </div>
+                        <div id="boardColTodo" class="space-y-2 min-h-[300px]"></div>
+                    </div>
+                    <div class="bg-surface-container-low p-3 rounded-2xl space-y-2">
+                        <div class="flex justify-between items-center px-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-secondary">Active</span>
+                            <span id="countActive" class="text-[10px] font-bold bg-surface-container px-2 py-0.5 rounded-full">0</span>
+                        </div>
+                        <div id="boardColActive" class="space-y-2 min-h-[300px]"></div>
+                    </div>
+                    <div class="bg-surface-container-low p-3 rounded-2xl space-y-2">
+                        <div class="flex justify-between items-center px-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-secondary">Done</span>
+                            <span id="countDone" class="text-[10px] font-bold bg-surface-container px-2 py-0.5 rounded-full">0</span>
+                        </div>
+                        <div id="boardColDone" class="space-y-2 min-h-[300px]"></div>
+                    </div>
+                </div>
+
+                <!-- Rollover Banner -->
+                <div class="p-4 bg-surface-container-low rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-sm">Need to clear remaining items?</h4>
+                        <p class="text-xs opacity-75">Reschedule all pending tasks to tomorrow in one action.</p>
+                    </div>
+                    <button onclick="rolloverTasksToTomorrow()" class="bg-secondary text-on-primary dark:bg-surface-container dark:text-white py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-1 active-scale transition-all">
+                        <span class="material-symbols-outlined text-[16px]">keyboard_double_arrow_right</span>
+                        <span>Reschedule Unfinished</span>
+                    </button>
+                </div>
+            </section>
+
+
+            <!-- SCREEN 3: CALENDAR -->
+            <section id="screen-calendar" class="route-screen space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold tracking-tight">Calendar</h2>
+                    <div class="flex items-center gap-2 bg-surface-container-low p-1 rounded-full">
+                        <button class="cal-view-btn px-3 py-1 rounded-full text-xs font-bold bg-white dark:bg-primary shadow-sm" data-view="daily">Daily</button>
+                        <button class="cal-view-btn px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant" data-view="weekly">Weekly</button>
+                        <button class="cal-view-btn px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant" data-view="agenda">Agenda</button>
+                    </div>
+                </div>
+
+                <!-- Week Picker -->
+                <div class="flex items-center justify-between">
+                    <h3 id="calendarMonthHeader" class="font-bold text-base">October 2026</h3>
+                    <div class="flex gap-1">
+                        <button onclick="shiftCalendarWeek(-1)" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container active-scale"><span class="material-symbols-outlined text-[20px]">chevron_left</span></button>
+                        <button onclick="shiftCalendarWeek(1)" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container active-scale"><span class="material-symbols-outlined text-[20px]">chevron_right</span></button>
+                    </div>
+                </div>
+                
+                <!-- Horizontal date bar -->
+                <div id="calendarDateBar" class="flex justify-between py-2 border-b border-outline-variant/20 overflow-x-auto hide-scrollbar"></div>
+
+                <!-- Conflict Detection Banner -->
+                <div id="conflictAlertBanner" class="p-3 bg-error-container text-on-error-container rounded-xl flex items-center gap-3 hidden animate-bounce">
+                    <span class="material-symbols-outlined text-error">warning</span>
+                    <p class="text-xs font-semibold" id="conflictAlertText">Time Conflict Detected</p>
+                </div>
+
+                <!-- Calendar Content Render Area -->
+                <div id="calendarDisplayArea" class="space-y-4"></div>
+
+                <!-- Suggested Planning Slots -->
+                <div class="space-y-3 p-4 bg-surface-container-low rounded-2xl">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sage text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">AI Suggested Slots</h4>
+                    </div>
+                    <div class="space-y-2" id="aiSuggestedSlots"></div>
+                </div>
+
+                <!-- Unscheduled Drawer -->
+                <div class="border border-outline-variant/30 rounded-2xl bg-surface-container-low overflow-hidden">
+                    <button onclick="toggleUnscheduledDrawer()" class="w-full p-4 flex justify-between items-center hover:bg-surface-container transition-colors">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-secondary">Unscheduled Drawer</span>
+                            <span id="unscheduledCount" class="text-[10px] font-bold bg-surface-container px-2 py-0.5 rounded-full">0</span>
+                        </div>
+                        <span id="unscheduledArrow" class="material-symbols-outlined transition-transform duration-200">keyboard_arrow_up</span>
+                    </button>
+                    <div id="unscheduledList" class="p-4 pt-0 space-y-2 hidden border-t border-outline-variant/20 max-h-60 overflow-y-auto"></div>
+                </div>
+            </section>
+
+
+            <!-- SCREEN 4: GOALS -->
+            <section id="screen-goals" class="route-screen space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold tracking-tight">Roadmaps & Goals</h2>
+                    <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-full">
+                        <button class="goal-view-btn px-3 py-1 rounded-full text-xs font-bold bg-white dark:bg-primary shadow-sm" data-type="all">All</button>
+                        <button class="goal-view-btn px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant" data-type="Short-term">Short</button>
+                        <button class="goal-view-btn px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant" data-type="Long-term">Long</button>
+                    </div>
+                </div>
+
+                <!-- Goals Cards Grid -->
+                <div id="goalsCardsGrid" class="space-y-4"></div>
+            </section>
+
+
+            <!-- SCREEN 5: INSIGHTS -->
+            <section id="screen-insights" class="route-screen space-y-6 hidden">
+                <h2 class="text-2xl font-bold tracking-tight">System Insights</h2>
+                
+                <!-- SVG Chart Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Chart 1: Focus minutes -->
+                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10 space-y-3">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-secondary block">Focus Time</span>
+                            <h4 class="font-bold text-sm">Focus Block (Minutes)</h4>
+                        </div>
+                        <div class="h-32 flex items-end justify-between px-2 pt-4" id="insightsFocusChartContainer">
+                            <svg class="w-full h-full" viewBox="0 0 200 80" preserveAspectRatio="none">
+                                <rect x="10" y="50" width="16" height="30" rx="3" fill="#A4B8C4"/>
+                                <rect x="36" y="30" width="16" height="50" rx="3" fill="#A4B8C4"/>
+                                <rect x="62" y="20" width="16" height="60" rx="3" fill="#8DA399"/>
+                                <rect x="88" y="45" width="16" height="35" rx="3" fill="#A4B8C4"/>
+                                <rect x="114" y="60" width="16" height="20" rx="3" fill="#e0e0db"/>
+                                <rect x="140" y="10" width="16" height="70" rx="3" fill="#8DA399"/>
+                                <rect x="166" y="25" width="16" height="55" rx="3" fill="#8DA399"/>
+                            </svg>
+                        </div>
+                        <div class="flex justify-between text-[9px] font-bold text-secondary uppercase px-1">
+                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Habit Consistency -->
+                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10 space-y-3">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-secondary block">Streaks score</span>
+                            <h4 class="font-bold text-sm">Habit Consistency</h4>
+                        </div>
+                        <div class="h-32 flex items-end justify-between px-2 pt-4">
+                            <svg class="w-full h-full" viewBox="0 0 200 80" preserveAspectRatio="none">
+                                <path d="M 10 60 Q 40 40, 70 20 T 130 50 T 190 15" fill="none" stroke="#8DA399" stroke-width="3" stroke-linecap="round"/>
+                                <circle cx="10" cy="60" r="4" fill="#8DA399"/>
+                                <circle cx="70" cy="20" r="4" fill="#8DA399"/>
+                                <circle cx="130" cy="50" r="4" fill="#8DA399"/>
+                                <circle cx="190" cy="15" r="4" fill="#8DA399"/>
+                            </svg>
+                        </div>
+                        <div class="flex justify-between text-[9px] font-bold text-secondary uppercase px-1">
+                            <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Burnout and Load Balancer -->
+                <div class="bg-surface-container-low rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-red-500">spa</span>
+                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Burnout Energy Index</h4>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span>Cognitive Load Ratio</span>
+                            <span id="burnoutRiskVal" class="text-sage font-bold">15% (Safe)</span>
+                        </div>
+                        <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                            <div id="burnoutRiskBar" class="h-full bg-sage w-[15%] transition-all duration-300"></div>
+                        </div>
+                    </div>
+                    
+                    <p id="burnoutRiskAdvice" class="text-xs text-on-surface-variant opacity-85 leading-relaxed">Stable loading metrics.</p>
+                </div>
+
+                <!-- AI Review Generator -->
+                <div class="bg-surface-container-low rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sage" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                            <h4 class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">AI Weekly Evaluations</h4>
+                        </div>
+                        <button onclick="aiGenerateWeeklyReview()" class="text-xs font-bold text-sage hover:underline">Trigger Win Review</button>
+                    </div>
+                    
+                    <div id="aiReviewResponse" class="p-4 bg-white dark:bg-surface-container-lowest rounded-xl text-xs space-y-2 leading-relaxed">
+                        <p class="opacity-75">Click evaluate to query Gemini API over task history metrics.</p>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SCREEN 6: SYSTEM SETTINGS -->
+            <section id="screen-settings" class="route-screen space-y-6 hidden">
+                <h2 class="text-2xl font-bold tracking-tight">System Preferences</h2>
+                
+                <!-- Cloud Sync Credentials configuration -->
+                <div class="bg-surface-container-low rounded-2xl p-5 space-y-4 border border-sage/20">
+                    <h3 class="font-bold text-sm border-b border-outline-variant/20 pb-2 flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-sm text-sage">cloud_sync</span>
+                        <span>Cloud Database & AI Configurations</span>
+                    </h3>
+                    
+                    <p class="text-xs opacity-70">Integrate your own cloud infrastructure (completely free tier) to enable cloud storage, multi-device real-time sync, and private AI planning.</p>
+                    
+                    <div class="space-y-3">
+                        <div class="space-y-1">
+                            <label for="settingsSubUrl" class="text-[10px] font-bold uppercase tracking-wider text-secondary">Supabase Project URL</label>
+                            <input type="text" id="settingsSubUrl" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2.5 text-xs" placeholder="https://your-project.supabase.co"/>
+                        </div>
+                        <div class="space-y-1">
+                            <label for="settingsSubKey" class="text-[10px] font-bold uppercase tracking-wider text-secondary">Supabase Anon Key</label>
+                            <input type="password" id="settingsSubKey" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2.5 text-xs" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."/>
+                        </div>
+                        <div class="space-y-1">
+                            <label for="settingsGeminiKey" class="text-[10px] font-bold uppercase tracking-wider text-secondary">Google Gemini API Key</label>
+                            <input type="password" id="settingsGeminiKey" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2.5 text-xs" placeholder="AIzaSy..."/>
+                        </div>
+                        
+                        <button onclick="saveCloudSettings()" class="w-full bg-sage text-white py-3 rounded-xl font-bold text-xs active-scale">
+                            Save & Connect Backend
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Appearance & Contrast Toggle -->
+                <div class="bg-surface-container-low rounded-2xl p-5 space-y-4">
+                    <h3 class="font-bold text-sm border-b border-outline-variant/20 pb-2">Accessibility & Themes</h3>
+                    
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-xs block">Dark Mode</span>
+                            <span class="text-[10px] opacity-60">Nordic Slate theme</span>
+                        </div>
+                        <button id="themeToggleBtn" class="w-12 h-6 rounded-full bg-outline-variant/30 relative transition-colors duration-200" aria-label="Toggle dark theme">
+                            <span class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-transform duration-200" id="themeTogglerBall"></span>
+                        </button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-xs block">Dynamic Scale font</span>
+                                <span class="text-[10px] opacity-60">Resize UI text</span>
+                            </div>
+                            <span id="textScaleVal" class="text-xs font-bold">16px</span>
+                        </div>
+                        <input type="range" id="textScaleSlider" min="12" max="22" value="16" class="w-full accent-sage h-1 bg-surface-container rounded-lg cursor-pointer"/>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-xs block">Reduced Motion</span>
+                            <span class="text-[10px] opacity-60">Disable layout transitions</span>
+                        </div>
+                        <button id="reducedMotionBtn" class="w-12 h-6 rounded-full bg-outline-variant/30 relative transition-colors duration-200" aria-label="Toggle reduced motion">
+                            <span class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-transform duration-200" id="reducedMotionBall"></span>
+                        </button>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-xs block">Browser Notifications</span>
+                            <span class="text-[10px] opacity-60">Request alert permissions</span>
+                        </div>
+                        <button onclick="requestAlertPermissions()" class="text-xs font-bold text-sage hover:underline">Enable Alerts</button>
+                    </div>
+                </div>
+
+                <!-- Calendar Exports -->
+                <div class="bg-surface-container-low rounded-2xl p-5 space-y-4">
+                    <h3 class="font-bold text-sm border-b border-outline-variant/20 pb-2">Calendar Sync Subscription</h3>
+                    <p class="text-xs opacity-75">Generate a standard `.ics` subscription calendar for Google Calendar, Apple Calendar, or Notion Calendar.</p>
+                    
+                    <button onclick="exportICSFile()" class="w-full bg-primary text-white dark:bg-white dark:text-primary py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 active-scale transition-transform">
+                        <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                        <span>Generate & Export ICS Calendar</span>
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- CHAT BOTTOM SHEET / SIDE ASSISTANT -->
+        <div id="assistantPanel" class="fixed top-0 bottom-0 right-0 w-full sm:w-96 bg-surface-container-lowest border-l border-outline-variant/30 shadow-2xl z-[80] transform translate-x-full transition-transform duration-300 flex flex-col justify-between hidden">
+            <header class="p-4 border-b border-outline-variant/20 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sage">smart_toy</span>
+                    <span class="font-bold text-sm">MYDAY2 AI Second Brain</span>
+                </div>
+                <button id="assistantClose" class="material-symbols-outlined opacity-60 hover:opacity-100">close</button>
+            </header>
+            
+            <div id="assistantMessages" class="flex-grow p-4 overflow-y-auto space-y-3 text-xs">
+                <div class="bg-surface-container-low p-3 rounded-xl max-w-[85%] text-on-surface">
+                    <p class="leading-relaxed">Hi, I'm your MYDAY2 planner. What goals, tasks, or habits can I orchestrate for you today?</p>
+                    <div class="mt-3 flex flex-wrap gap-1.5">
+                        <button onclick="assistantQuickCommand('suggest a schedule')" class="bg-white dark:bg-primary border border-outline-variant/20 px-2.5 py-1 rounded-full font-bold hover:bg-surface-container transition-colors active-scale">Auto-Schedule Today</button>
+                        <button onclick="assistantQuickCommand('check burnout')" class="bg-white dark:bg-primary border border-outline-variant/20 px-2.5 py-1 rounded-full font-bold hover:bg-surface-container transition-colors active-scale">Burnout Health Check</button>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="p-4 border-t border-outline-variant/20 space-y-2">
+                <div class="flex items-center gap-2 bg-surface-container-low rounded-xl px-3 py-1.5">
+                    <input type="text" id="assistantInput" placeholder="Message assistant..." class="w-full bg-transparent border-none focus:ring-0 p-0 text-xs text-on-surface placeholder:opacity-40"/>
+                    <button id="assistantSendBtn" class="material-symbols-outlined text-sage hover:opacity-80 active-scale">send</button>
+                </div>
+            </footer>
+        </div>
+
+        <!-- QUICK ADD BOTTOM SHEET -->
+        <div id="quickAddBackdrop" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-[70] hidden opacity-0 transition-opacity duration-300" onclick="toggleQuickAddSheet()"></div>
+        <div id="quickAddSheet" class="fixed bottom-0 left-0 right-0 bg-surface dark:bg-surface-dim rounded-t-[32px] shadow-[0px_-8px_40px_rgba(0,0,0,0.12)] z-[80] transition-transform duration-300 transform translate-y-full flex flex-col max-h-[90dvh] overflow-hidden">
+            <div class="w-full flex justify-center pt-4 pb-2 cursor-pointer" onclick="toggleQuickAddSheet()">
+                <div class="w-12 h-1 bg-outline-variant/40 rounded-full"></div>
+            </div>
+
+            <div id="quickAddMenu" class="p-6 pt-2 space-y-6">
+                <h3 class="font-bold text-lg tracking-tight">Capture Intention</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="showQuickAddForm('task')" class="flex flex-col items-start p-5 rounded-2xl bg-white dark:bg-surface-container-lowest border border-outline-variant/10 hover:border-sage active-scale">
+                        <span class="material-symbols-outlined text-primary dark:text-white mb-2">check_circle</span>
+                        <span class="text-xs font-bold">New Task</span>
+                    </button>
+                    <button onclick="showQuickAddForm('bulk')" class="flex flex-col items-start p-5 rounded-2xl bg-white dark:bg-surface-container-lowest border border-outline-variant/10 hover:border-sage active-scale">
+                        <span class="material-symbols-outlined text-primary dark:text-white mb-2">playlist_add</span>
+                        <span class="text-xs font-bold">Bulk Tasks</span>
+                    </button>
+                    <button onclick="showQuickAddForm('habit')" class="flex flex-col items-start p-5 rounded-2xl bg-white dark:bg-surface-container-lowest border border-outline-variant/10 hover:border-sage active-scale">
+                        <span class="material-symbols-outlined text-primary dark:text-white mb-2">history_edu</span>
+                        <span class="text-xs font-bold">New Habit</span>
+                    </button>
+                    <button onclick="showQuickAddForm('goal')" class="flex flex-col items-start p-5 rounded-2xl bg-white dark:bg-surface-container-lowest border border-outline-variant/10 hover:border-sage active-scale">
+                        <span class="material-symbols-outlined text-primary dark:text-white mb-2">emoji_events</span>
+                        <span class="text-xs font-bold">New Goal</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- FORMS -->
+            <!-- Task Form -->
+            <div id="quickFormTask" class="p-6 pt-2 space-y-4 hidden overflow-y-auto">
+                <div class="flex items-center gap-2 mb-2">
+                    <button onclick="hideQuickAddForms()" class="material-symbols-outlined opacity-60">arrow_back</button>
+                    <h3 class="font-bold text-lg">Add Task</h3>
+                </div>
+                <div class="space-y-3">
+                    <input type="text" id="taskTitleInput" placeholder="What is the task?" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-sm focus:ring-0 focus:border-sage"/>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="taskCatSelect" class="text-[10px] font-bold uppercase tracking-wider opacity-60 block mb-1">Category</label>
+                            <select id="taskCatSelect" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs">
+                                <option value="Work">Work</option>
+                                <option value="Personal">Personal</option>
+                                <option value="Growth">Growth</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="taskPrioritySelect" class="text-[10px] font-bold uppercase tracking-wider opacity-60 block mb-1">Priority</label>
+                            <select id="taskPrioritySelect" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="taskTimeInput" class="text-[10px] font-bold uppercase tracking-wider opacity-60 block mb-1">Start Time</label>
+                            <input type="time" id="taskTimeInput" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs" value="09:00"/>
+                        </div>
+                        <div>
+                            <label for="taskDateInput" class="text-[10px] font-bold uppercase tracking-wider opacity-60 block mb-1">Date</label>
+                            <input type="date" id="taskDateInput" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs"/>
+                        </div>
+                    </div>
+                    
+                    <button onclick="submitTaskForm()" class="w-full bg-primary text-white dark:bg-white dark:text-primary py-3.5 rounded-xl font-bold text-xs active-scale">Create Task</button>
+                </div>
+            </div>
+
+            <!-- Bulk Form -->
+            <div id="quickFormBulk" class="p-6 pt-2 space-y-4 h-full hidden flex flex-col">
+                <div class="flex items-center gap-2 mb-2">
+                    <button onclick="hideQuickAddForms()" class="material-symbols-outlined opacity-60">arrow_back</button>
+                    <h3 class="font-bold text-lg">Bulk Import</h3>
+                </div>
+                <textarea id="bulkTextarea" placeholder="Workout at 7am&#10;Plan presentation deck #work&#10;Call client #work !high" class="w-full flex-grow h-48 bg-surface-container-low border border-outline-variant/30 rounded-xl p-4 text-xs resize-none focus:ring-0 focus:border-sage"></textarea>
+                <button onclick="submitBulkForm()" class="w-full bg-primary text-white dark:bg-white dark:text-primary py-3.5 rounded-xl font-bold text-xs active-scale">Import Items</button>
+            </div>
+
+            <!-- Habit Form -->
+            <div id="quickFormHabit" class="p-6 pt-2 space-y-4 hidden">
+                <div class="flex items-center gap-2 mb-2">
+                    <button onclick="hideQuickAddForms()" class="material-symbols-outlined opacity-60">arrow_back</button>
+                    <h3 class="font-bold text-lg">New Habit</h3>
+                </div>
+                <div class="space-y-3">
+                    <input type="text" id="habitTitleInput" placeholder="Habit name (e.g. Drink 3L of water)" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-sm focus:ring-0 focus:border-sage"/>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="habitIconSelect" class="text-[10px] font-bold uppercase tracking-wider opacity-60 block mb-1">Icon</label>
+                            <select id="habitIconSelect" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs">
+                                <option value="water_drop">Water</option>
+                                <option value="self_improvement">Yoga</option>
+                                <option value="menu_book">Book</option>
+                                <option value="directions_run">Cardio</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="habitFreqSelect" class="text-[10px] font-bold uppercase tracking-wider opacity-60 block mb-1">Rhythm</label>
+                            <select id="habitFreqSelect" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs">
+                                <option value="Daily">Daily</option>
+                                <option value="Weekly">Weekly</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button onclick="submitHabitForm()" class="w-full bg-primary text-white dark:bg-white dark:text-primary py-3.5 rounded-xl font-bold text-xs active-scale">Create Habit</button>
+                </div>
+            </div>
+
+            <!-- Goal Form -->
+            <div id="quickFormGoal" class="p-6 pt-2 space-y-4 hidden">
+                <div class="flex items-center gap-2 mb-2">
+                    <button onclick="hideQuickAddForms()" class="material-symbols-outlined opacity-60">arrow_back</button>
+                    <h3 class="font-bold text-lg">Create Goal</h3>
+                </div>
+                <div class="space-y-3">
+                    <input type="text" id="goalTitleInput" placeholder="Goal name" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-sm focus:ring-0 focus:border-sage"/>
+                    <input type="text" id="goalVisionInput" placeholder="Vision description" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-sm focus:ring-0 focus:border-sage"/>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="goalTermSelect" class="text-[10px] font-bold uppercase tracking-wider opacity-60 block mb-1">Horizon</label>
+                            <select id="goalTermSelect" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs">
+                                <option value="Short-term">Short-term</option>
+                                <option value="Long-term">Long-term</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="goalTargetDate" class="text-[10px] font-bold uppercase tracking-wider opacity-60 block mb-1">Date</label>
+                            <input type="date" id="goalTargetDate" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs"/>
+                        </div>
+                    </div>
+                    
+                    <button onclick="submitGoalForm()" class="w-full bg-primary text-white dark:bg-white dark:text-primary py-3.5 rounded-xl font-bold text-xs active-scale">Establish Goal</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLOATING ACTION BUTTON -->
+        <button id="globalFAB" aria-label="Quick Add" class="fixed bottom-20 right-6 w-14 h-14 bg-primary text-on-primary dark:bg-white dark:text-primary rounded-full shadow-2xl flex items-center justify-center z-40 active-scale hover:scale-105 transition-all">
+            <span class="material-symbols-outlined text-2xl font-bold">add</span>
+        </button>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="fixed bottom-0 left-0 w-full glass-nav flex justify-around items-center px-2 py-3 pb-safe z-40 rounded-t-2xl shadow-xl">
+            <button onclick="switchTab('today')" id="nav-today" class="nav-tab-btn flex flex-col items-center justify-center text-primary dark:text-white px-3 py-1.5 rounded-xl transition-all">
+                <span class="material-symbols-outlined text-xl">wb_sunny</span>
+                <span class="text-[10px] font-bold tracking-wide mt-1">Today</span>
+            </button>
+            <button onclick="switchTab('tasks')" id="nav-tasks" class="nav-tab-btn flex flex-col items-center justify-center text-on-surface-variant opacity-60 px-3 py-1.5 rounded-xl transition-all">
+                <span class="material-symbols-outlined text-xl">check_circle</span>
+                <span class="text-[10px] font-bold tracking-wide mt-1">Tasks</span>
+            </button>
+            <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-tab-btn flex flex-col items-center justify-center text-on-surface-variant opacity-60 px-3 py-1.5 rounded-xl transition-all">
+                <span class="material-symbols-outlined text-xl">calendar_today</span>
+                <span class="text-[10px] font-bold tracking-wide mt-1">Calendar</span>
+            </button>
+            <button onclick="switchTab('goals')" id="nav-goals" class="nav-tab-btn flex flex-col items-center justify-center text-on-surface-variant opacity-60 px-3 py-1.5 rounded-xl transition-all">
+                <span class="material-symbols-outlined text-xl">emoji_events</span>
+                <span class="text-[10px] font-bold tracking-wide mt-1">Goals</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- CORE SCRIPTS GLUE -->
+    <script src="/supabase-client.js"></script>
+    <script src="/ai-client.js"></script>
+    <script src="/notification-service.js"></script>
+    <script src="/ics-generator.js"></script>
+
+    <script>
+        // Global Application state object (loads from localStorage on init)
+        let state = {
+            user: { name: "Alex", sleepHours: 8, wakeTime: "07:00", focusWindow: "09:00-12:00", mode: "Balanced", onboardingComplete: false },
+            tasks: [],
+            habits: [],
+            goals: [],
+            events: [],
+            notifications: [],
+            focusLogs: [],
+            settings: { darkMode: false, textScale: 16, reducedMotion: false }
+        };
+
+        const todayDateStr = new Date().toISOString().split("T")[0];
+
+        // --- AUTH & BYPASS HANDLERS ---
+        let activeAuthTab = "login";
+
+        document.getElementById("authTabLoginBtn").addEventListener("click", () => {
+            activeAuthTab = "login";
+            document.getElementById("authTabLoginBtn").className = "flex-1 py-2 text-xs font-bold rounded-lg bg-white dark:bg-primary shadow-sm";
+            document.getElementById("authTabSignupBtn").className = "flex-1 py-2 text-xs font-bold text-on-surface-variant rounded-lg";
+            document.getElementById("signupNameField").classList.add("hidden");
+            document.getElementById("authSubmitText").innerText = "Access Account";
+        });
+
+        document.getElementById("authTabSignupBtn").addEventListener("click", () => {
+            activeAuthTab = "signup";
+            document.getElementById("authTabSignupBtn").className = "flex-1 py-2 text-xs font-bold rounded-lg bg-white dark:bg-primary shadow-sm";
+            document.getElementById("authTabLoginBtn").className = "flex-1 py-2 text-xs font-bold text-on-surface-variant rounded-lg";
+            document.getElementById("signupNameField").classList.remove("hidden");
+            document.getElementById("authSubmitText").innerText = "Register Profile";
+        });
+
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById("authEmail").value.trim();
+            const password = document.getElementById("authPassword").value;
+            const name = document.getElementById("authName").value.trim();
+
+            if (!window.dbEngine.isConnected) {
+                alert("Please configure your Supabase cloud settings first, or click 'Run Local-Only'.");
+                return;
+            }
+
+            try {
+                if (activeAuthTab === "signup") {
+                    await window.dbEngine.signUp(email, password, name);
+                    alert("Account verification link sent to email! Check inbox to sign in.");
+                } else {
+                    await window.dbEngine.signIn(email, password);
+                    await syncCloudData();
+                }
+            } catch (err) {
+                alert(`Auth Error: ${err.message}`);
+            }
+        }
+
+        async function syncCloudData() {
+            const data = await window.dbEngine.fetchUserData();
+            if (data) {
+                state.user = { ...state.user, name: data.user.name, onboardingComplete: true };
+                state.tasks = data.tasks;
+                state.habits = data.habits;
+                state.goals = data.goals;
+                state.events = data.events;
+                
+                // Establish Realtime subscription
+                window.dbEngine.setupRealtimeSubscription(data.user.id, (payload) => {
+                    handleRealtimeChange(payload);
+                });
+
+                document.getElementById("syncStatusLabel").innerText = "Synced with Cloud";
+                document.getElementById("authLogoutBtn").classList.remove("hidden");
+                
+                finalizeAuthSuccess();
+            }
+        }
+
+        function handleRealtimeChange(payload) {
+            const { table, eventType, new: newRec, old: oldRec } = payload;
+            
+            // Simple sync dispatcher
+            if (table === "tasks") {
+                if (eventType === "DELETE") state.tasks = state.tasks.filter(t => t.id !== oldRec.id);
+                else {
+                    const idx = state.tasks.findIndex(t => t.id === newRec.id);
+                    if (idx > -1) state.tasks[idx] = newRec;
+                    else state.tasks.push(newRec);
+                }
+            } else if (table === "habits") {
+                if (eventType === "DELETE") state.habits = state.habits.filter(h => h.id !== oldRec.id);
+                else {
+                    const idx = state.habits.findIndex(h => h.id === newRec.id);
+                    if (idx > -1) state.habits[idx] = newRec;
+                    else state.habits.push(newRec);
+                }
+            } else if (table === "goals") {
+                if (eventType === "DELETE") state.goals = state.goals.filter(g => g.id !== oldRec.id);
+                else {
+                    const idx = state.goals.findIndex(g => g.id === newRec.id);
+                    if (idx > -1) state.goals[idx] = newRec;
+                    else state.goals.push(newRec);
+                }
+            }
+            
+            saveStateToCache();
+            renderAll();
+        }
+
+        function bypassAuthOffline() {
+            console.log("Accessing app in offline local-only mode.");
+            finalizeAuthSuccess();
+        }
+
+        function finalizeAuthSuccess() {
+            document.getElementById("authOverlay").classList.add("hidden");
+            document.getElementById("mainApp").classList.remove("hidden");
+            
+            // Load local configs
+            const localState = localStorage.getItem("myday2_life_os_state");
+            if (localState) {
+                const parsed = JSON.parse(localState);
+                if (parsed.user.onboardingComplete) {
+                    state = parsed;
+                    applySettings();
+                    renderAll();
+                    return;
+                }
+            }
+            
+            // If onboarding not done
+            document.getElementById("onboardingOverlay").classList.remove("hidden");
+            document.getElementById("mainApp").classList.add("hidden");
+            showStep(1);
+        }
+
+        document.getElementById("authLogoutBtn").addEventListener("click", async () => {
+            await window.dbEngine.signOut();
+            window.location.reload();
+        });
+
+
+        // --- PWA SERVICE WORKER REGISTRATION ---
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("/sw.js")
+                    .then(reg => console.log("Service Worker registered on scale scope:", reg.scope))
+                    .catch(err => console.error("SW registration failure:", err));
+            });
+        }
+
+
+        // --- DYNAMIC SETTINGS FORM CONFIG ---
+        function loadSettingsForm() {
+            document.getElementById("settingsSubUrl").value = localStorage.getItem("myday2_supabase_url") || "";
+            document.getElementById("settingsSubKey").value = localStorage.getItem("myday2_supabase_key") || "";
+            document.getElementById("settingsGeminiKey").value = localStorage.getItem("myday2_gemini_key") || "";
+        }
+
+        function saveCloudSettings() {
+            const url = document.getElementById("settingsSubUrl").value.trim();
+            const key = document.getElementById("settingsSubKey").value.trim();
+            const gemini = document.getElementById("settingsGeminiKey").value.trim();
+
+            window.dbEngine.updateConfig(url, key);
+            window.aiEngine.updateConfig(gemini);
+
+            alert("Configurations updated and re-initialized.");
+            window.location.reload();
+        }
+
+
+        // --- LOCAL STORAGE CACHE UTILS ---
+        function saveStateToCache() {
+            localStorage.setItem("myday2_life_os_state", JSON.stringify(state));
+            
+            // Trigger background reminder sync
+            if (window.notifier) {
+                window.notifier.syncAllReminders(state.tasks, state.habits);
+            }
+        }
+
+
+        // --- ONBOARDING ENGINE ---
+        let onboardingStep = 1;
+        
+        function showStep(step) {
+            onboardingStep = step;
+            for (let i = 1; i <= 6; i++) {
+                const el = document.getElementById(`obStep${i}`);
+                if (i === step) el.classList.remove("hidden");
+                else el.classList.add("hidden");
+            }
+            document.getElementById("onboardingProgressText").innerText = `Step ${step} of 6`;
+            document.getElementById("onboardingProgressBar").style.width = `${(step / 6) * 100}%`;
+            document.getElementById("obBackBtn").disabled = (step === 1);
+            
+            if (step === 6) {
+                document.getElementById("obNextBtn").querySelector("span").innerText = "Generate Second Brain";
+            } else {
+                document.getElementById("obNextBtn").querySelector("span").innerText = "Continue";
+            }
+        }
+
+        // Onboarding listeners
+        document.querySelectorAll(".ob-sleep-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".ob-sleep-btn").forEach(b => b.classList.remove("border-sage"));
+                btn.classList.add("border-sage");
+                state.user.sleepHours = parseInt(btn.dataset.hours);
+            });
+        });
+
+        document.querySelectorAll(".ob-focus-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".ob-focus-btn").forEach(b => b.classList.remove("border-sage"));
+                btn.classList.add("border-sage");
+                state.user.focusWindow = btn.dataset.window;
+            });
+        });
+
+        document.querySelectorAll(".ob-style-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".ob-style-btn").forEach(b => b.classList.remove("border-sage"));
+                btn.classList.add("border-sage");
+                state.user.mode = btn.dataset.mode;
+            });
+        });
+
+        document.querySelectorAll(".ob-goal-chip").forEach(chip => {
+            chip.addEventListener("click", () => {
+                chip.classList.toggle("border-sage");
+                chip.classList.toggle("border-transparent");
+                chip.querySelector(".material-symbols-outlined").classList.toggle("opacity-0");
+            });
+        });
+
+        document.querySelectorAll(".ob-habit-row").forEach(row => {
+            row.addEventListener("click", () => {
+                row.classList.toggle("border-sage");
+                row.classList.toggle("border-transparent");
+                row.querySelector(".material-symbols-outlined").classList.toggle("opacity-0");
+            });
+        });
+
+        document.getElementById("obBackBtn").addEventListener("click", () => {
+            if (onboardingStep > 1) showStep(onboardingStep - 1);
+        });
+
+        document.getElementById("obNextBtn").addEventListener("click", async () => {
+            if (onboardingStep < 6) {
+                showStep(onboardingStep + 1);
+            } else {
+                // Finalize setup
+                state.user.name = document.getElementById("obNameInput").value.trim() || "Alex";
+                state.user.wakeTime = document.getElementById("obWakeTime").value;
+                state.user.onboardingComplete = true;
+
+                // Build initial goals
+                state.goals = [];
+                document.querySelectorAll(".ob-goal-chip.border-sage").forEach((chip, index) => {
+                    const goal = {
+                        id: `g_${Date.now()}_${index}`,
+                        title: chip.dataset.goal,
+                        description: "Selected during signup setup",
+                        timeline: "Long-term",
+                        milestones: ["Draft strategy", "Identify milestones"],
+                        progress: 0,
+                        category: "Growth"
+                    };
+                    state.goals.push(goal);
+                    window.dbEngine.queueOrExecute("goals", "insert", { ...goal, user_id: window.dbEngine.userId }, goal.id);
+                });
+
+                // Build initial habits
+                state.habits = [];
+                document.querySelectorAll(".ob-habit-row.border-sage").forEach((row, index) => {
+                    const habit = {
+                        id: `h_${Date.now()}_${index}`,
+                        title: row.dataset.habit,
+                        frequency: "Daily",
+                        streak: 0,
+                        reminder_time: "08:00",
+                        consistency_score: 0,
+                        category: row.dataset.icon
+                    };
+                    state.habits.push(habit);
+                    window.dbEngine.queueOrExecute("habits", "insert", { ...habit, user_id: window.dbEngine.userId }, habit.id);
+                });
+
+                // Set sample tasks
+                const task = {
+                    id: `t_${Date.now()}`,
+                    title: "Welcome to MYDAY2: Review layout and goals",
+                    category: "Growth",
+                    priority: "High",
+                    time: "09:00",
+                    date: todayDateStr,
+                    status: "Pending",
+                    subtasks: []
+                };
+                state.tasks = [task];
+                window.dbEngine.queueOrExecute("tasks", "insert", { ...task, user_id: window.dbEngine.userId, due_date: todayDateStr, start_time: "09:00" }, task.id);
+
+                saveStateToCache();
+                
+                document.getElementById("onboardingOverlay").classList.add("hidden");
+                document.getElementById("mainApp").classList.remove("hidden");
+                
+                applySettings();
+                renderAll();
+            }
+        });
+
+
+        // --- DYNAMIC TABS ROUTING ---
+        let activeTab = "today";
+        
+        function switchTab(tabId) {
+            activeTab = tabId;
+            document.querySelectorAll(".route-screen").forEach(s => s.classList.add("hidden"));
+            document.getElementById(`screen-${tabId}`).classList.remove("hidden");
+            
+            // Tab indicators
+            document.querySelectorAll(".nav-tab-btn").forEach(b => {
+                b.classList.add("opacity-60", "text-on-surface-variant");
+                b.classList.remove("text-primary", "dark:text-white");
+            });
+            const btn = document.getElementById(`nav-${tabId}`);
+            if (btn) {
+                btn.classList.remove("opacity-60", "text-on-surface-variant");
+                btn.classList.add("text-primary", "dark:text-white");
+            }
+
+            closeSidebar();
+            if (tabId === "settings") loadSettingsForm();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+
+        // --- SIDEBAR HANDLERS ---
+        function openSidebar() {
+            document.getElementById("sidebar").classList.remove("-translate-x-full");
+            document.getElementById("sidebarOverlay").classList.remove("opacity-0", "pointer-events-none");
+        }
+
+        function closeSidebar() {
+            document.getElementById("sidebar").classList.add("-translate-x-full");
+            document.getElementById("sidebarOverlay").classList.add("opacity-0", "pointer-events-none");
+        }
+
+        document.getElementById("sidebarToggle").addEventListener("click", openSidebar);
+        document.getElementById("sidebarClose").addEventListener("click", closeSidebar);
+        document.getElementById("sidebarOverlay").addEventListener("click", closeSidebar);
+        
+        document.querySelectorAll(".sidebar-nav-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                switchTab(btn.dataset.tab);
+            });
+        });
+
+
+        // --- REAL AI INTEGRATIONS (GEMINI & LOCAL FALLBACKS) ---
+
+        // 1. Goal decomposition
+        async function aiDecomposeGoal(id) {
+            const goal = state.goals.find(g => g.id === id);
+            if (!goal) return;
+
+            addNotification("Querying Gemini to decompose goal roadmap...");
+            
+            try {
+                const roadmap = await window.aiEngine.decomposeGoal(goal.title, goal.timeline || "6 months");
+                
+                goal.milestones = roadmap.milestones;
+                goal.progress = 20;
+                
+                // Add suggested tasks to database
+                roadmap.tasks.forEach((tTitle, index) => {
+                    const task = {
+                        id: `t_ai_${Date.now()}_${index}`,
+                        title: `[Roadmap] ${tTitle}`,
+                        category: goal.category || "Work",
+                        priority: "Medium",
+                        time: `1${index}:00`,
+                        date: todayDateStr,
+                        status: "Pending",
+                        subtasks: []
+                    };
+                    state.tasks.push(task);
+                    window.dbEngine.queueOrExecute("tasks", "insert", { 
+                        ...task, 
+                        user_id: window.dbEngine.userId, 
+                        due_date: todayDateStr, 
+                        start_time: task.time 
+                    }, task.id);
+                });
+
+                saveStateToCache();
+                renderAll();
+                addNotification(`Goal "${goal.title}" decomposed successfully.`);
+            } catch (err) {
+                console.error("AI goal decomposition failed:", err);
+                alert("AI call timed out. Fallback milestones loaded.");
+            }
+        }
+
+        // 2. Task splitting
+        async function aiSplitTask(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if (!task) return;
+
+            addNotification("Requesting subtask split from Gemini...");
+
+            try {
+                const breakdown = await window.aiEngine.splitTask(task.title);
+                task.subtasks = breakdown.subtasks;
+                task.estimated_duration = breakdown.estimated_duration;
+                
+                window.dbEngine.queueOrExecute("tasks", "update", { 
+                    subtasks: task.subtasks,
+                    estimated_duration: task.estimated_duration
+                }, task.id);
+
+                saveStateToCache();
+                renderAll();
+                addNotification(`Task "${task.title}" split into ${task.subtasks.length} subtasks.`);
+            } catch (err) {
+                alert("Failed to connect to AI server. Please verify your Gemini API key.");
+            }
+        }
+
+        // 3. Daily schedule optimization
+        async function aiOptimizeSchedule() {
+            addNotification("Analyzing daily timeline with Gemini...");
+
+            try {
+                const activeToday = state.tasks.filter(t => t.date === todayDateStr && t.status !== "Completed");
+                const activeHabits = state.habits;
+
+                const suggestions = await window.aiEngine.suggestDailyTimeline(activeToday, activeHabits, state.user.focusWindow);
+                
+                // Apply suggested times to tasks
+                suggestions.schedule.forEach(item => {
+                    const t = state.tasks.find(x => x.title.toLowerCase().includes(item.title.toLowerCase()) || item.title.toLowerCase().includes(x.title.toLowerCase()));
+                    if (t) {
+                        t.time = item.time;
+                        window.dbEngine.queueOrExecute("tasks", "update", { start_time: item.time }, t.id);
+                    }
+                });
+
+                document.getElementById("aiSummaryText").innerText = `AI Schedule Optimized: ${suggestions.focusPriorities.join(" • ")}`;
+                saveStateToCache();
+                renderAll();
+                addNotification("Daily schedule optimized.");
+            } catch (err) {
+                alert("AI daily optimize timed out. Check connection.");
+            }
+        }
+
+        // 4. Burnout health checking
+        async function calculateBurnoutAndLoad() {
+            try {
+                const active = state.tasks.filter(t => t.status !== "Completed");
+                const response = await window.aiEngine.calculateBurnoutIndex(active, state.user.sleepHours);
+                
+                const val = document.getElementById("burnoutRiskVal");
+                const bar = document.getElementById("burnoutRiskBar");
+                const advice = document.getElementById("burnoutRiskAdvice");
+
+                val.innerText = `${response.burnoutIndex}% (${response.burnoutStatus})`;
+                bar.style.width = `${response.burnoutIndex}%`;
+                advice.innerText = response.advice;
+
+                if (response.burnoutIndex > 60) {
+                    val.className = "text-error font-bold";
+                    bar.className = "h-full bg-error";
+                } else {
+                    val.className = "text-sage font-bold";
+                    bar.className = "h-full bg-sage";
+                }
+            } catch (e) {
+                console.error("Local burnout fallback calculation:", e);
+            }
+        }
+
+        // 5. Weekly Review AI
+        async function aiGenerateWeeklyReview() {
+            const container = document.getElementById("aiReviewResponse");
+            container.innerHTML = `<p class="animate-pulse">Consulting Gemini evaluator...</p>`;
+
+            try {
+                const review = await window.aiEngine.generateWeeklyReview(state.focusLogs, state.tasks, state.goals);
+                
+                container.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex justify-between font-bold text-sage">
+                            <span>Win evaluation Report</span>
+                            <span>Consistency: ${review.consistencyScore}%</span>
+                        </div>
+                        <p>${review.summary}</p>
+                        <div class="p-2 bg-surface-container rounded-lg">
+                            <span class="font-bold">Burnout Warning:</span>
+                            <p class="opacity-80">${review.burnoutWarning}</p>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                container.innerHTML = `<p class="text-error">API key missing or request limit hit.</p>`;
+            }
+        }
+
+
+        // --- TODAY VIEW LOGIC & RENDERS ---
+        function renderToday() {
+            // Greetings
+            document.getElementById("todayGreeting").innerText = `Good morning, ${state.user.name}`;
+
+            // Render Top Priorities
+            const container = document.getElementById("topPrioritiesContainer");
+            container.innerHTML = "";
+            const todayTasks = state.tasks.filter(t => t.date === todayDateStr);
+            const priorities = todayTasks.filter(t => t.priority === "High").slice(0, 3);
+
+            if (priorities.length === 0) {
+                container.innerHTML = `<p class="p-4 bg-surface-container-low text-xs text-center opacity-60 rounded-xl">No high priorities scheduled for today.</p>`;
+            } else {
+                priorities.forEach(t => {
+                    const done = t.status === "Completed";
+                    const el = document.createElement("div");
+                    el.className = "flex items-center justify-between p-4 bg-white dark:bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10";
+                    el.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <button onclick="toggleTaskStatus('${t.id}')" aria-label="Toggle completed status" class="w-5 h-5 rounded-full border-2 ${done ? 'bg-sage border-sage text-white' : 'border-outline-variant'} flex items-center justify-center">
+                                ${done ? '<span class="material-symbols-outlined text-[12px]">done</span>' : ''}
+                            </button>
+                            <span class="text-xs font-bold ${done ? 'line-through opacity-50' : ''}">${t.title}</span>
+                        </div>
+                        <button onclick="aiSplitTask('${t.id}')" class="text-[10px] font-bold text-sage bg-sage-container px-2 py-0.5 rounded-full active-scale">Split with AI</button>
+                    `;
+                    container.appendChild(el);
+                });
+            }
+
+            // Render Daily Timeline
+            const timeline = document.getElementById("todayTimeline");
+            timeline.innerHTML = "";
+
+            const morning = [];
+            const afternoon = [];
+
+            todayTasks.forEach(t => {
+                const hour = parseInt(t.time ? t.time.split(":")[0] : "09");
+                const block = { id: t.id, title: t.title, time: t.time || "09:00", priority: t.priority, status: t.status };
+                if (hour < 12) morning.push(block);
+                else afternoon.push(block);
+            });
+
+            function buildSection(title, list) {
+                if (list.length === 0) return "";
+                let html = `<div class="space-y-2.5 pt-2 mb-4">
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-secondary bg-surface-container px-2 py-0.5 rounded-full">${title}</span>`;
+                
+                list.forEach(item => {
+                    const done = item.status === "Completed";
+                    html += `
+                        <div class="relative pl-6 cursor-pointer" onclick="toggleTaskStatus('${item.id}')">
+                            <div class="absolute left-[-18px] top-3 w-2.5 h-2.5 rounded-full border-2 ${done ? 'bg-sage border-sage' : 'border-outline-variant bg-surface'}"></div>
+                            <div class="bg-white dark:bg-surface-container-lowest p-3.5 rounded-xl shadow-sm border border-outline-variant/10">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="font-bold ${done ? 'line-through opacity-50' : ''}">${item.title}</span>
+                                    <span class="opacity-60 text-[9px]">${item.time}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                return html + "</div>";
+            }
+
+            timeline.innerHTML += buildSection("Morning Focus", morning);
+            timeline.innerHTML += buildSection("Afternoon Flow", afternoon);
+
+            if (todayTasks.length === 0) {
+                timeline.innerHTML = `<p class="text-xs opacity-65 text-center py-2">Schedule clear.</p>`;
+            }
+
+            // Render habits checklist
+            const habitsList = document.getElementById("todayHabitsList");
+            habitsList.innerHTML = "";
+
+            if (state.habits.length === 0) {
+                habitsList.innerHTML = `<p class="text-xs opacity-65 text-center py-2">No habits tracked.</p>`;
+            } else {
+                state.habits.forEach(h => {
+                    const done = h.history && h.history.includes(todayDateStr);
+                    const el = document.createElement("div");
+                    el.className = "flex items-center justify-between p-2 rounded-lg hover:bg-surface-container/30";
+                    el.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-sm opacity-60">${h.category || 'water_drop'}</span>
+                            <span class="text-xs font-semibold ${done ? 'line-through opacity-50' : ''}">${h.title}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[9px] font-bold bg-surface-container px-2 py-0.5 rounded-full">🔥 ${h.streak}d</span>
+                            <button onclick="toggleHabitStatus('${h.id}')" aria-label="Toggle habit status" class="w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${done ? 'bg-sage text-white border-sage' : 'border-outline-variant'}">
+                                <span class="material-symbols-outlined text-xs">done</span>
+                            </button>
+                        </div>
+                    `;
+                    habitsList.appendChild(el);
+                });
+            }
+        }
+
+
+        // --- TASKS DATABASE VIEW ---
+        let taskCategoryFilter = "All";
+
+        function renderTasks() {
+            let list = state.tasks;
+            if (taskCategoryFilter !== "All") {
+                list = list.filter(t => t.category === taskCategoryFilter);
+            }
+
+            // List render
+            const container = document.getElementById("tasksListContainer");
+            container.innerHTML = "";
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="p-8 text-center text-xs opacity-60">No tasks logged.</p>`;
+            } else {
+                list.forEach(t => {
+                    const done = t.status === "Completed";
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "swipe-container border border-outline-variant/10 shadow-sm";
+                    wrapper.innerHTML = `
+                        <div class="swipe-item-inner p-4 bg-white dark:bg-surface-container flex items-center justify-between border-l-4 ${t.priority === 'High' ? 'border-error' : 'border-sage'}">
+                            <div class="flex items-center gap-3">
+                                <button onclick="toggleTaskStatus('${t.id}')" aria-label="Check task" class="w-5 h-5 rounded-full border-2 ${done ? 'bg-sage border-sage text-white' : 'border-outline-variant'} flex items-center justify-center">
+                                    ${done ? '<span class="material-symbols-outlined text-[12px]">done</span>' : ''}
+                                </button>
+                                <div>
+                                    <h4 class="text-xs font-bold ${done ? 'line-through opacity-50' : ''}">${t.title}</h4>
+                                    <div class="flex gap-2 text-[9px] opacity-60 mt-0.5">
+                                        <span>${t.category}</span>
+                                        <span>•</span>
+                                        <span>${t.time}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="deleteTask('${t.id}')" class="material-symbols-outlined text-xs opacity-40 hover:opacity-100 hover:text-error">delete</button>
+                                <span class="text-[9px] font-bold bg-surface-container px-2 py-0.5 rounded-full">${t.priority}</span>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(wrapper);
+                });
+            }
+
+            // Kanban render
+            const todo = document.getElementById("boardColTodo");
+            const active = document.getElementById("boardColActive");
+            const done = document.getElementById("boardColDone");
+            
+            todo.innerHTML = "";
+            active.innerHTML = "";
+            done.innerHTML = "";
+
+            list.forEach(t => {
+                const card = document.createElement("div");
+                card.className = "bg-white dark:bg-surface-container p-3 rounded-xl shadow-sm border border-outline-variant/10 text-xs space-y-2 cursor-pointer hover:shadow active-scale";
+                card.innerHTML = `
+                    <p class="font-bold text-on-surface">${t.title}</p>
+                    <div class="flex justify-between items-center text-[9px] opacity-60">
+                        <span>${t.category}</span>
+                        <button onclick="shiftTaskBoard('${t.id}')" class="material-symbols-outlined text-xs">arrow_forward</button>
+                    </div>
+                `;
+                
+                if (t.status === "Pending") todo.appendChild(card);
+                else if (t.status === "Active") active.appendChild(card);
+                else done.appendChild(card);
+            });
+
+            // Counters
+            document.getElementById("countTodo").innerText = list.filter(t => t.status === "Pending").length;
+            document.getElementById("countActive").innerText = list.filter(t => t.status === "Active").length;
+            document.getElementById("countDone").innerText = list.filter(t => t.status === "Completed").length;
+        }
+
+        function shiftTaskBoard(id) {
+            const t = state.tasks.find(x => x.id === id);
+            if (t) {
+                if (t.status === "Pending") t.status = "Active";
+                else if (t.status === "Active") t.status = "Completed";
+                else t.status = "Pending";
+                
+                window.dbEngine.queueOrExecute("tasks", "update", { status: t.status }, t.id);
+                saveStateToCache();
+                renderAll();
+            }
+        }
+
+        function toggleTaskStatus(id) {
+            const t = state.tasks.find(x => x.id === id);
+            if (t) {
+                t.status = (t.status === "Completed") ? "Pending" : "Completed";
+                window.dbEngine.queueOrExecute("tasks", "update", { status: t.status }, t.id);
+                saveStateToCache();
+                renderAll();
+            }
+        }
+
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            window.dbEngine.queueOrExecute("tasks", "delete", null, id);
+            saveStateToCache();
+            renderAll();
+        }
+
+        function rolloverTasksToTomorrow() {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+            let count = 0;
+            state.tasks.forEach(t => {
+                if (t.date === todayDateStr && t.status !== "Completed") {
+                    t.date = tomorrowStr;
+                    window.dbEngine.queueOrExecute("tasks", "update", { due_date: tomorrowStr }, t.id);
+                    count++;
+                }
+            });
+
+            if (count > 0) {
+                saveStateToCache();
+                renderAll();
+                addNotification(`Shifted ${count} active items to tomorrow.`);
+            }
+        }
+
+        document.getElementById("btnListView").addEventListener("click", () => {
+            document.getElementById("btnListView").className = "px-3 py-1 rounded-full text-xs font-bold bg-white dark:bg-primary shadow-sm";
+            document.getElementById("btnBoardView").className = "px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant";
+            document.getElementById("tasksListContainer").classList.remove("hidden");
+            document.getElementById("tasksBoardContainer").classList.add("hidden");
+        });
+
+        document.getElementById("btnBoardView").addEventListener("click", () => {
+            document.getElementById("btnBoardView").className = "px-3 py-1 rounded-full text-xs font-bold bg-white dark:bg-primary shadow-sm";
+            document.getElementById("btnListView").className = "px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant";
+            document.getElementById("tasksListContainer").classList.add("hidden");
+            document.getElementById("tasksBoardContainer").classList.remove("hidden");
+        });
+
+        document.querySelectorAll(".task-filter-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".task-filter-btn").forEach(b => {
+                    b.className = "task-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-surface-container-low text-on-surface-variant hover:bg-surface-container active-scale";
+                });
+                btn.className = "task-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary dark:bg-white dark:text-primary active-scale";
+                taskCategoryFilter = btn.dataset.category;
+                renderTasks();
+            });
+        });
+
+
+        // --- CALENDAR AGENDA VIEWS & CONFLICT DETECTION ---
+        let calOffset = 0;
+        let calView = "daily";
+
+        function renderCalendar() {
+            const display = document.getElementById("calendarDisplayArea");
+            display.innerHTML = "";
+
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + (calOffset * 7));
+            
+            const monthHeader = document.getElementById("calendarMonthHeader");
+            monthHeader.innerText = targetDate.toLocaleString("default", { month: "long", year: "numeric" });
+
+            const startOfWeek = new Date(targetDate);
+            const currentDay = targetDate.getDay();
+            const distance = (currentDay === 0 ? -6 : 1) - currentDay;
+            startOfWeek.setDate(startOfWeek.getDate() + distance);
+
+            const dateBar = document.getElementById("calendarDateBar");
+            dateBar.innerHTML = "";
+
+            let focusDateStr = todayDateStr;
+
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(startOfWeek);
+                day.setDate(day.getDate() + i);
+                const dStr = day.toISOString().split("T")[0];
+                const dayName = day.toLocaleDateString("default", { weekday: "short" });
+                const dayNum = day.getDate();
+                const isActive = dStr === todayDateStr;
+
+                const dayEl = document.createElement("div");
+                dayEl.className = `flex flex-col items-center gap-2 min-w-[50px] cursor-pointer transition-all active-scale ${isActive ? '' : 'opacity-55'}`;
+                dayEl.innerHTML = `
+                    <span class="text-[9px] font-bold uppercase tracking-wider">${dayName}</span>
+                    <span class="w-10 h-10 flex items-center justify-center rounded-xl font-bold text-sm ${isActive ? 'bg-primary text-white dark:bg-white dark:text-primary' : 'bg-surface-container-low'}">${dayNum}</span>
+                `;
+                dayEl.addEventListener("click", () => {
+                    focusDateStr = dStr;
+                    renderCalendarSchedule(dStr);
+                });
+                dateBar.appendChild(dayEl);
+            }
+
+            renderCalendarSchedule(focusDateStr);
+            detectCalendarConflicts(focusDateStr);
+        }
+
+        function shiftCalendarWeek(dir) {
+            calOffset += dir;
+            renderCalendar();
+        }
+
+        function renderCalendarSchedule(dateString) {
+            const display = document.getElementById("calendarDisplayArea");
+            display.innerHTML = "";
+
+            const dayTasks = state.tasks.filter(t => t.date === dateString);
+            const dayEvents = state.events.filter(e => e.date === dateString);
+
+            if (dayTasks.length === 0 && dayEvents.length === 0) {
+                display.innerHTML = `<p class="p-8 bg-surface-container-low text-xs text-center opacity-60 rounded-xl">Agenda clear.</p>`;
+                return;
+            }
+
+            // Sort chronological blocks
+            const blocks = [];
+            dayTasks.forEach(t => blocks.push({ id: t.id, title: t.title, start: t.time || "09:00", type: "task" }));
+            dayEvents.forEach(e => blocks.push({ id: e.id, title: e.title, start: e.start_time.split("T")[1]?.substring(0,5) || "12:00", type: "event" }));
+            blocks.sort((a,b) => a.start.localeCompare(b.start));
+
+            blocks.forEach(item => {
+                const el = document.createElement("div");
+                el.className = `flex items-center gap-4 p-4 rounded-xl border-l-4 ${item.type === 'task' ? 'border-sage bg-surface-container-low' : 'border-blue bg-blue-container text-on-blue-container'}`;
+                el.innerHTML = `
+                    <span class="text-xs font-bold opacity-60 w-12">${item.start}</span>
+                    <div>
+                        <h4 class="text-xs font-bold">${item.title}</h4>
+                        <span class="text-[9px] uppercase tracking-wide opacity-75">${item.type} Block</span>
+                    </div>
+                `;
+                display.appendChild(el);
+            });
+        }
+
+        function detectCalendarConflicts(dateStr) {
+            const banner = document.getElementById("conflictAlertBanner");
+            const text = document.getElementById("conflictAlertText");
+            banner.classList.add("hidden");
+
+            const dayTasks = state.tasks.filter(t => t.date === dateStr);
+            const ranges = [];
+
+            dayTasks.forEach(t => {
+                if (t.time) {
+                    const [h, m] = t.time.split(":").map(Number);
+                    const start = (h * 60) + m;
+                    ranges.push({ title: t.title, start, end: start + (t.estimated_duration || 45) });
+                }
+            });
+
+            for (let i = 0; i < ranges.length; i++) {
+                for (let j = i + 1; j < ranges.length; j++) {
+                    const r1 = ranges[i];
+                    const r2 = ranges[j];
+                    if (r1.start < r2.end && r2.start < r1.end) {
+                        text.innerText = `Conflict: "${r1.title}" overlaps with "${r2.title}"!`;
+                        banner.classList.remove("hidden");
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Suggested slots mapping
+        function renderSuggestedSlots() {
+            const slots = document.getElementById("aiSuggestedSlots");
+            slots.innerHTML = `
+                <div class="p-3 bg-white dark:bg-surface-container-lowest rounded-xl flex items-center justify-between text-xs">
+                    <div>
+                        <span class="font-bold text-sage block">09:30 AM</span>
+                        <span class="opacity-75">Peak morning focus window. Protect for strategic strategy task.</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Unscheduled drawer
+        let drawerOpen = false;
+        function toggleUnscheduledDrawer() {
+            drawerOpen = !drawerOpen;
+            const list = document.getElementById("unscheduledList");
+            const arrow = document.getElementById("unscheduledArrow");
+            
+            if (drawerOpen) {
+                list.classList.remove("hidden");
+                arrow.style.transform = "rotate(180deg)";
+            } else {
+                list.classList.add("hidden");
+                arrow.style.transform = "rotate(0deg)";
+            }
+        }
+
+        function renderUnscheduledTasks() {
+            const list = document.getElementById("unscheduledList");
+            const count = document.getElementById("unscheduledCount");
+
+            const unscheduled = state.tasks.filter(t => !t.date);
+            count.innerText = unscheduled.length;
+
+            list.innerHTML = "";
+            if (unscheduled.length === 0) {
+                list.innerHTML = `<p class="text-xs opacity-60 text-center py-2">Drawer clear.</p>`;
+                return;
+            }
+
+            unscheduled.forEach(t => {
+                const el = document.createElement("div");
+                el.className = "flex items-center justify-between p-3 bg-white dark:bg-surface-container-lowest rounded-xl text-xs";
+                el.innerHTML = `
+                    <span>${t.title}</span>
+                    <button onclick="scheduleTaskToday('${t.id}')" class="text-xs font-bold text-sage hover:underline">Schedule Today</button>
+                `;
+                list.appendChild(el);
+            });
+        }
+
+        function scheduleTaskToday(id) {
+            const t = state.tasks.find(x => x.id === id);
+            if (t) {
+                t.date = todayDateStr;
+                t.time = "10:00";
+                window.dbEngine.queueOrExecute("tasks", "update", { due_date: todayDateStr, start_time: "10:00" }, t.id);
+                saveStateToCache();
+                renderAll();
+            }
+        }
+
+        document.querySelectorAll(".cal-view-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".cal-view-btn").forEach(b => {
+                    b.className = "cal-view-btn px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant";
+                });
+                btn.className = "cal-view-btn px-3 py-1 rounded-full text-xs font-bold bg-white dark:bg-primary shadow-sm";
+                calView = btn.dataset.view;
+                renderCalendar();
+            });
+        });
+
+
+        // --- HABITS Streaks ---
+        function toggleHabitStatus(id) {
+            const h = state.habits.find(x => x.id === id);
+            if (h) {
+                if (!h.history) h.history = [];
+                const idx = h.history.indexOf(todayDateStr);
+                if (idx > -1) {
+                    h.history.splice(idx, 1);
+                    h.streak = Math.max(0, h.streak - 1);
+                } else {
+                    h.history.push(todayDateStr);
+                    h.streak += 1;
+                }
+
+                // Sync with cloud
+                window.dbEngine.queueOrExecute("habits", "update", { streak: h.streak }, h.id);
+                
+                // Track completion event
+                const comp = {
+                    id: `hc_${Date.now()}`,
+                    habit_id: h.id,
+                    completion_date: todayDateStr,
+                    status: "Completed"
+                };
+                window.dbEngine.queueOrExecute("habit_completions", "insert", comp, comp.id);
+
+                saveStateToCache();
+                renderAll();
+            }
+        }
+
+
+        // --- GOAL VIEW ROADMAPS ---
+        function renderGoals() {
+            const container = document.getElementById("goalsCardsGrid");
+            container.innerHTML = "";
+
+            if (state.goals.length === 0) {
+                container.innerHTML = `<p class="p-8 text-center text-xs opacity-60">No goals active.</p>`;
+                return;
+            }
+
+            state.goals.forEach(g => {
+                const el = document.createElement("div");
+                el.className = "p-5 bg-surface-container-low rounded-2xl border border-outline-variant/10 space-y-4";
+                
+                let milestonesHtml = "";
+                if (g.milestones) {
+                    g.milestones.forEach(m => {
+                        milestonesHtml += `
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="w-1.5 h-1.5 rounded-full bg-sage"></span>
+                                <span class="opacity-75">${m}</span>
+                            </div>
+                        `;
+                    });
+                }
+
+                el.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider text-secondary block">${g.timeline || 'Long-term'}</span>
+                            <h3 class="font-bold text-sm mt-0.5">${g.title}</h3>
+                        </div>
+                        <span class="text-xs font-bold text-sage">${g.progress}%</span>
+                    </div>
+
+                    <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+                        <div class="h-full bg-sage" style="width: ${g.progress}%"></div>
+                    </div>
+
+                    <div class="space-y-2 border-t border-outline-variant/20 pt-3">
+                        <h4 class="text-[9px] font-bold uppercase tracking-wider text-secondary">Roadmap Milestones</h4>
+                        ${milestonesHtml || '<p class="text-[10px] opacity-50">Generate roadmap breakdown with Gemini.</p>'}
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="aiDecomposeGoal('${g.id}')" class="flex-grow py-2 rounded-xl bg-white dark:bg-primary border border-outline-variant/20 text-xs font-bold text-sage flex items-center justify-center gap-1 active-scale transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+                            <span>Decompose Roadmap</span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+
+        // --- POMODORO TIMER WIDGET ---
+        let timerInterval = null;
+        let timerSeconds = 25 * 60;
+        let timerRunning = false;
+
+        function updateTimerDisplay() {
+            const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+            const s = String(timerSeconds % 60).padStart(2, '0');
+            document.getElementById("focusTimerDisplay").innerText = `${m}:${s}`;
+        }
+
+        document.getElementById("focusDurationSelect").addEventListener("change", (e) => {
+            if (!timerRunning) {
+                timerSeconds = parseInt(e.target.value) * 60;
+                updateTimerDisplay();
+            }
+        });
+
+        document.getElementById("focusStartBtn").addEventListener("click", () => {
+            const btn = document.getElementById("focusStartBtn");
+            if (timerRunning) {
+                clearInterval(timerInterval);
+                timerRunning = false;
+                btn.innerText = "Start";
+            } else {
+                timerRunning = true;
+                btn.innerText = "Pause";
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        timerRunning = false;
+                        btn.innerText = "Start";
+                        
+                        // Log duration
+                        const dur = parseInt(document.getElementById("focusDurationSelect").value);
+                        state.focusLogs.push({ date: todayDateStr, duration: dur });
+                        
+                        saveStateToCache();
+                        calculateBurnoutAndLoad();
+                        renderAll();
+
+                        alert("Focus Session Complete!");
+                    }
+                }, 1000);
+            }
+        });
+
+
+        // --- NOTIFICATION UTILS ---
+        function addNotification(text) {
+            const notif = {
+                id: `n_${Date.now()}`,
+                text,
+                time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            };
+            state.notifications.unshift(notif);
+            saveStateToCache();
+            renderNotifications();
+        }
+
+        function renderNotifications() {
+            const list = document.getElementById("notificationList");
+            const badge = document.getElementById("notifBadge");
+            list.innerHTML = "";
+
+            if (state.notifications.length === 0) {
+                list.innerHTML = `<p class="text-center text-xs opacity-50 py-4">No active reminders.</p>`;
+                badge.classList.add("hidden");
+            } else {
+                badge.classList.remove("hidden");
+                badge.innerText = state.notifications.length;
+
+                state.notifications.forEach(n => {
+                    const el = document.createElement("div");
+                    el.className = "p-2 hover:bg-surface-container-low rounded-xl text-xs space-y-1";
+                    el.innerHTML = `
+                        <div class="flex justify-between font-semibold">
+                            <span>${n.text}</span>
+                            <span class="opacity-45 text-[9px]">${n.time}</span>
+                        </div>
+                    `;
+                    list.appendChild(el);
+                });
+            }
+        }
+
+        document.getElementById("notificationTrigger").addEventListener("click", (e) => {
+            e.stopPropagation();
+            document.getElementById("notificationPanel").classList.toggle("hidden");
+        });
+
+        document.getElementById("clearNotificationsBtn").addEventListener("click", () => {
+            state.notifications = [];
+            saveStateToCache();
+            renderNotifications();
+        });
+
+        function requestAlertPermissions() {
+            window.notifier.requestPermission().then(granted => {
+                if (granted) alert("Browser notification permissions enabled.");
+                else alert("Notification blocked by browser settings.");
+            });
+        }
+
+
+        // --- RFC CALENDAR ICS EXPORTS ---
+        function exportICSFile() {
+            const timezone = state.user.timezone || "UTC";
+            const icsData = window.icsEngine.generate(state.events, state.tasks, state.habits, state.goals, timezone);
+            window.icsEngine.download(icsData, `myday2_sync_${todayDateStr}.ics`);
+            addNotification("ICS Calendar subscription generated.");
+        }
+
+
+        // --- CONVERSATIONAL AI CHATBOX ---
+        document.getElementById("assistantTrigger").addEventListener("click", () => {
+            document.getElementById("assistantPanel").classList.toggle("hidden");
+            document.getElementById("assistantPanel").classList.toggle("translate-x-full");
+        });
+
+        document.getElementById("assistantClose").addEventListener("click", () => {
+            document.getElementById("assistantPanel").classList.add("hidden");
+            document.getElementById("assistantPanel").classList.add("translate-x-full");
+        });
+
+        function assistantQuickCommand(cmd) {
+            document.getElementById("assistantInput").value = cmd;
+            submitAssistantChat();
+        }
+
+        document.getElementById("assistantSendBtn").addEventListener("click", submitAssistantChat);
+        document.getElementById("assistantInput").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") submitAssistantChat();
+        });
+
+        async function submitAssistantChat() {
+            const input = document.getElementById("assistantInput");
+            const text = input.value.trim();
+            if (!text) return;
+
+            renderChatBubble(text, true);
+            input.value = "";
+
+            try {
+                // Call Gemini for chat response
+                const response = await window.aiEngine.queryGemini(text, "You are a professional life operating planner in MYDAY2.", false);
+                renderChatBubble(response, false);
+            } catch (err) {
+                renderChatBubble("API key configuration required, running fallback planner. Click Auto-Schedule to align tasks.", false);
+            }
+        }
+
+        function renderChatBubble(text, isUser) {
+            const container = document.getElementById("assistantMessages");
+            const el = document.createElement("div");
+            el.className = isUser 
+                ? "bg-sage-container text-on-sage-container p-3 rounded-xl max-w-[85%] ml-auto text-right"
+                : "bg-surface-container-low p-3 rounded-xl max-w-[85%] text-on-surface";
+            el.innerHTML = `<p>${text}</p>`;
+            container.appendChild(el);
+            container.scrollTop = container.scrollHeight;
+        }
+
+
+        // --- QUICK ADD LOGICS ---
+        function toggleQuickAddSheet() {
+            const sheet = document.getElementById("quickAddSheet");
+            const backdrop = document.getElementById("quickAddBackdrop");
+            
+            if (sheet.classList.contains("translate-y-full")) {
+                sheet.classList.remove("translate-y-full");
+                backdrop.classList.remove("hidden");
+                setTimeout(() => backdrop.classList.add("opacity-100"), 10);
+                hideQuickAddForms();
+            } else {
+                sheet.classList.add("translate-y-full");
+                backdrop.classList.remove("opacity-100");
+                setTimeout(() => backdrop.classList.add("hidden"), 300);
+            }
+        }
+
+        document.getElementById("globalFAB").addEventListener("click", toggleQuickAddSheet);
+
+        function showQuickAddForm(type) {
+            document.getElementById("quickAddMenu").classList.add("hidden");
+            document.getElementById("quickFormTask").classList.add("hidden");
+            document.getElementById("quickFormBulk").classList.add("hidden");
+            document.getElementById("quickFormHabit").classList.add("hidden");
+            document.getElementById("quickFormGoal").classList.add("hidden");
+            
+            document.getElementById("taskDateInput").value = todayDateStr;
+            document.getElementById("goalTargetDate").value = todayDateStr;
+
+            if (type === "task") document.getElementById("quickFormTask").classList.remove("hidden");
+            if (type === "bulk") document.getElementById("quickFormBulk").classList.remove("hidden");
+            if (type === "habit") document.getElementById("quickFormHabit").classList.remove("hidden");
+            if (type === "goal") document.getElementById("quickFormGoal").classList.remove("hidden");
+        }
+
+        function hideQuickAddForms() {
+            document.getElementById("quickAddMenu").classList.remove("hidden");
+            document.getElementById("quickFormTask").classList.add("hidden");
+            document.getElementById("quickFormBulk").classList.add("hidden");
+            document.getElementById("quickFormHabit").classList.add("hidden");
+            document.getElementById("quickFormGoal").classList.add("hidden");
+        }
+
+        function submitTaskForm() {
+            const title = document.getElementById("taskTitleInput").value.trim();
+            if (!title) return alert("Task title required.");
+
+            const task = {
+                id: `t_${Date.now()}`,
+                title: title,
+                category: document.getElementById("taskCatSelect").value,
+                priority: document.getElementById("taskPrioritySelect").value,
+                time: document.getElementById("taskTimeInput").value,
+                date: document.getElementById("taskDateInput").value,
+                status: "Pending",
+                subtasks: []
+            };
+
+            state.tasks.push(task);
+            window.dbEngine.queueOrExecute("tasks", "insert", { 
+                ...task, 
+                user_id: window.dbEngine.userId, 
+                due_date: task.date, 
+                start_time: task.time 
+            }, task.id);
+
+            saveStateToCache();
+            document.getElementById("taskTitleInput").value = "";
+            toggleQuickAddSheet();
+            addNotification(`Task "${title}" created.`);
+            renderAll();
+        }
+
+        function submitBulkForm() {
+            const rawText = document.getElementById("bulkTextarea").value;
+            const lines = rawText.split("\n").map(l => l.trim()).filter(l => l !== "");
+            
+            if (lines.length === 0) return alert("Enter at least one item.");
+
+            lines.forEach((line, index) => {
+                let category = "Work";
+                let priority = "Medium";
+                let title = line;
+
+                if (line.includes("#personal")) { category = "Personal"; title = title.replace("#personal", ""); }
+                if (line.includes("#growth")) { category = "Growth"; title = title.replace("#growth", ""); }
+                if (line.includes("!high")) { priority = "High"; title = title.replace("!high", ""); }
+
+                const task = {
+                    id: `t_bulk_${Date.now()}_${index}`,
+                    title: title.trim(),
+                    category,
+                    priority,
+                    time: `${10 + (index % 6)}:00`,
+                    date: todayDateStr,
+                    status: "Pending",
+                    subtasks: []
+                };
+
+                state.tasks.push(task);
+                window.dbEngine.queueOrExecute("tasks", "insert", { 
+                    ...task, 
+                    user_id: window.dbEngine.userId, 
+                    due_date: todayDateStr, 
+                    start_time: task.time 
+                }, task.id);
+            });
+
+            saveStateToCache();
+            document.getElementById("bulkTextarea").value = "";
+            toggleQuickAddSheet();
+            addNotification(`Bulk imported ${lines.length} items.`);
+            renderAll();
+        }
+
+        function submitHabitForm() {
+            const title = document.getElementById("habitTitleInput").value.trim();
+            if (!title) return alert("Habit title required.");
+
+            const habit = {
+                id: `h_${Date.now()}`,
+                title: title,
+                frequency: document.getElementById("habitFreqSelect").value,
+                streak: 0,
+                reminder_time: "08:00",
+                consistency_score: 0,
+                category: document.getElementById("habitIconSelect").value
+            };
+
+            state.habits.push(habit);
+            window.dbEngine.queueOrExecute("habits", "insert", { ...habit, user_id: window.dbEngine.userId }, habit.id);
+
+            saveStateToCache();
+            document.getElementById("habitTitleInput").value = "";
+            toggleQuickAddSheet();
+            addNotification(`Habit "${title}" established.`);
+            renderAll();
+        }
+
+        function submitGoalForm() {
+            const title = document.getElementById("goalTitleInput").value.trim();
+            if (!title) return alert("Goal title required.");
+
+            const goal = {
+                id: `g_${Date.now()}`,
+                title,
+                description: document.getElementById("goalVisionInput").value.trim() || "Set during quick add",
+                timeline: document.getElementById("goalTermSelect").value,
+                milestones: [],
+                progress: 0,
+                category: "Growth"
+            };
+
+            state.goals.push(goal);
+            window.dbEngine.queueOrExecute("goals", "insert", { ...goal, user_id: window.dbEngine.userId }, goal.id);
+
+            saveStateToCache();
+            document.getElementById("goalTitleInput").value = "";
+            document.getElementById("goalVisionInput").value = "";
+            toggleQuickAddSheet();
+            addNotification(`Intention "${title}" logged.`);
+            renderAll();
+        }
+
+
+        // --- ACCESSIBILITY preferences config ---
+        function applySettings() {
+            document.documentElement.style.fontSize = `${state.settings.textScale}px`;
+            document.getElementById("textScaleSlider").value = state.settings.textScale;
+            document.getElementById("textScaleVal").innerText = `${state.settings.textScale}px`;
+            
+            if (state.settings.darkMode) {
+                document.documentElement.classList.add("dark");
+                document.getElementById("themeTogglerBall").classList.add("translate-x-6");
+                document.getElementById("themeToggleBtn").classList.add("bg-sage");
+            } else {
+                document.documentElement.classList.remove("dark");
+                document.getElementById("themeTogglerBall").classList.remove("translate-x-6");
+                document.getElementById("themeToggleBtn").classList.remove("bg-sage");
+            }
+
+            if (state.settings.reducedMotion) {
+                document.body.classList.add("reduced-motion");
+                document.getElementById("reducedMotionBall").classList.add("translate-x-6");
+                document.getElementById("reducedMotionBtn").classList.add("bg-sage");
+            } else {
+                document.body.classList.remove("reduced-motion");
+                document.getElementById("reducedMotionBall").classList.remove("translate-x-6");
+                document.getElementById("reducedMotionBtn").classList.remove("bg-sage");
+            }
+        }
+
+        document.getElementById("themeToggleBtn").addEventListener("click", () => {
+            state.settings.darkMode = !state.settings.darkMode;
+            saveStateToCache();
+            applySettings();
+        });
+
+        document.getElementById("reducedMotionBtn").addEventListener("click", () => {
+            state.settings.reducedMotion = !state.settings.reducedMotion;
+            saveStateToCache();
+            applySettings();
+        });
+
+        document.getElementById("textScaleSlider").addEventListener("input", (e) => {
+            state.settings.textScale = parseInt(e.target.value);
+            saveStateToCache();
+            applySettings();
+        });
+
+        document.getElementById("resetAppBtn").addEventListener("click", () => {
+            if (confirm("Reset second brain? This action deletes all local cache items.")) {
+                localStorage.removeItem("myday2_life_os_state");
+                window.location.reload();
+            }
+        });
+
+
+        // --- GLOBAL RENDERS DISPATCHER ---
+        function renderAll() {
+            renderToday();
+            renderTasks();
+            renderCalendar();
+            renderGoals();
+            renderSuggestedSlots();
+            renderUnscheduledTasks();
+            calculateBurnoutAndLoad();
+            renderNotifications();
+        }
+
+        window.addEventListener("load", () => {
+            // Verify current session
+            setTimeout(async () => {
+                if (window.dbEngine.isConnected) {
+                    const user = await window.dbEngine.getCurrentUser();
+                    if (user) {
+                        await syncCloudData();
+                        return;
+                    }
+                }
+                
+                // Fallback to local mode validation if not logged in
+                const localState = localStorage.getItem("myday2_life_os_state");
+                if (localState) {
+                    const parsed = JSON.parse(localState);
+                    if (parsed.user.onboardingComplete) {
+                        state = parsed;
+                        applySettings();
+                        renderAll();
+                        document.getElementById("authOverlay").classList.add("hidden");
+                        document.getElementById("mainApp").classList.remove("hidden");
+                        return;
+                    }
+                }
+                
+                // Show login modal
+                document.getElementById("authOverlay").classList.remove("hidden");
+                document.getElementById("mainApp").classList.add("hidden");
+            }, 200);
+        });
+    </script>
+</body>
+</html>
