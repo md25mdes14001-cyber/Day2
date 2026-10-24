@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="g-419609679" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1F3D2B"/>
+      <stop offset="1" stop-color="#E2672B"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g-419609679)"/>
+  <circle cx="79" cy="279" r="109" fill="#E2672B" opacity="0.18"/><circle cx="19" cy="409" r="94" fill="#2F6B3A" opacity="0.18"/><circle cx="4" cy="201" r="60" fill="#E2672B" opacity="0.18"/><circle cx="401" cy="550" r="63" fill="#2F6B3A" opacity="0.18"/><circle cx="700" cy="443" r="52" fill="#E2672B" opacity="0.18"/>
+  <g transform="translate(400, 300)" text-anchor="middle">
+    <text y="-6" font-family="Georgia, serif" font-size="44" fill="#F4EFE3" opacity="0.92">home composting</text>
+  </g>
+</svg>

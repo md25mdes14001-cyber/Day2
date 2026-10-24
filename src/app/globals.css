@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fbf8f1;
+  --foreground: #16241c;
+
+  --color-forest: #16241c;
+  --color-green: #2f6b3a;
+  --color-green-dark: #234f2b;
+  --color-leaf: #6fa85a;
+  --color-sand: #fbf8f1;
+  --color-sand-dark: #f1ead9;
+  --color-terracotta: #e2672b;
+  --color-terracotta-dark: #c6531f;
+  --color-olive: #93a14a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-forest: var(--color-forest);
+  --color-green: var(--color-green);
+  --color-green-dark: var(--color-green-dark);
+  --color-leaf: var(--color-leaf);
+  --color-sand: var(--color-sand);
+  --color-sand-dark: var(--color-sand-dark);
+  --color-terracotta: var(--color-terracotta);
+  --color-terracotta-dark: var(--color-terracotta-dark);
+  --color-olive: var(--color-olive);
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.prose-ascend :where(p) {
+  margin-bottom: 1rem;
+  line-height: 1.75;
+}
+.prose-ascend :where(strong) {
+  color: var(--color-green-dark);
+}

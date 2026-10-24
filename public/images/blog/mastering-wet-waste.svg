@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="g-3054226086" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1F3D2B"/>
+      <stop offset="1" stop-color="#93A14A"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g-3054226086)"/>
+  <circle cx="-410" cy="-10" r="0" fill="#93A14A" opacity="0.18"/><circle cx="-503" cy="-452" r="-36" fill="#E2672B" opacity="0.18"/><circle cx="-726" cy="-582" r="-16" fill="#93A14A" opacity="0.18"/><circle cx="-182" cy="-523" r="-26" fill="#E2672B" opacity="0.18"/><circle cx="-246" cy="-516" r="7" fill="#93A14A" opacity="0.18"/>
+  <g transform="translate(400, 300)" text-anchor="middle">
+    <text y="-6" font-family="Georgia, serif" font-size="44" fill="#F4EFE3" opacity="0.92">mastering wet waste</text>
+  </g>
+</svg>
